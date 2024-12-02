@@ -3,14 +3,13 @@ package com.example.userdictionarydemo
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.database.ContentObserver
-import android.database.Cursor
-import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.provider.UserDictionary
 import android.util.Log
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import java.util.Locale
 
 
 class UserDictionaryManager(val contentResolver: ContentResolver) {
@@ -113,7 +112,7 @@ class UserDictionaryManager(val contentResolver: ContentResolver) {
 
 
     fun clean() {
-        contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
+        contentResolver.delete(UserDictionary.Words.CONTENT_URI,null,null)
     }
 
     fun selection(

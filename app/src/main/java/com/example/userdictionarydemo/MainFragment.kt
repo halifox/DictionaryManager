@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.userdictionarydemo.databinding.FragmentMainBinding
 
 
@@ -36,13 +37,13 @@ class MainFragment : Fragment() {
         // 本地词库管理 从文件添加标准格式 从文件添加搜狗格式 清空词库 移除某个搜狗词库 查看词库内容（多语言） 设置词库优先级 单个词条的CURD
         // 从搜狗下载词库
         //
-
+//        binding.toolbar.setupWithNavController(findNavController())
 
         binding.btnRequestPermission.setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
         binding.btnUd.setOnClickListener {
-            findNavController().navigate(R.id.secondFragment)
+            findNavController().navigate(R.id.UserDictionaryLangFragment)
         }
     }
 

@@ -12,8 +12,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingDataAdapter
@@ -25,9 +27,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ReflectUtils
 import com.blankj.utilcode.util.UriUtils
-import com.example.userdictionarydemo.databinding.FragmentUserDictionaryBinding
+import com.example.userdictionarydemo.databinding.FragmentDictionaryBinding
 import com.example.userdictionarydemo.databinding.ItemWordBinding
-import com.google.android.material.chip.Chip
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -36,16 +38,16 @@ import java.io.File
 import java.util.Locale
 
 
-class UserDictionaryFragment : Fragment() {
+class DictionaryFragment : Fragment() {
     companion object {
-        private const val TAG = "UserDictionaryFragment"
+        private const val TAG = "DictionaryFragment"
     }
 
-    private var _binding: FragmentUserDictionaryBinding? = null
+    private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentUserDictionaryBinding.inflate(inflater, container, false)
+        _binding = FragmentDictionaryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -54,8 +56,8 @@ class UserDictionaryFragment : Fragment() {
         _binding = null
     }
 
-    private var isLocalFilter: Boolean = false
-    private var localFilter: String? = null
+
+    private val locale by lazy { Locale.forLanguageTag(requireArguments().getString("languageTag", Locale.ROOT.toLanguageTag())) }
 
     private val sogou = Sogou()
     private val userDictionaryManager by lazy { UserDictionaryManager(requireContext().contentResolver) }
@@ -89,7 +91,7 @@ class UserDictionaryFragment : Fragment() {
                         val progressDialog = withContext(Dispatchers.Main) {
                             parseProgressDialog.dismiss()
                             ProgressDialog(requireContext()).apply {
-                                setTitle("添加到词典...")
+                                setTitle("添加到词库...")
                                 setCancelable(false)
                                 setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
                                 progress = 0
@@ -101,7 +103,7 @@ class UserDictionaryFragment : Fragment() {
 
 
                         entryList.forEachIndexed { index, wordEntry ->
-                            userDictionaryManager.insert(wordEntry.word, wordEntry.pinyin, locale = Locale.SIMPLIFIED_CHINESE.toString())
+                            userDictionaryManager.insert(wordEntry.word, wordEntry.pinyin, locale = locale.toString())
                             withContext(Dispatchers.Main) {
                                 progressDialog.progress = index
                             }
@@ -130,28 +132,28 @@ class UserDictionaryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView(binding.rv)
-        val queryLocales = userDictionaryManager.queryLocales()
-        Log.d("TAG", "queryLocales:${queryLocales} ")
+        setupToolbar(locale)
+        setupRecyclerView(locale)
+    }
 
-        binding.ChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-            if (checkedIds.isEmpty()) {
-                isLocalFilter = false
-                localFilter = null
-                adapter.refresh()
-                return@setOnCheckedStateChangeListener
-            }
-            val checkedId = checkedIds[0]
-            val checkedChip = view.findViewById<Chip>(checkedId)
-            isLocalFilter = true
-            localFilter = checkedChip.tag as? String?
-            adapter.refresh()
+
+    private fun setupToolbar(locale: Locale) {
+        val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
+        val collapsingToolbarLayout = requireActivity().findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar_layout)
+        var displayName = locale.getDisplayName()
+        if (locale == Locale.ROOT) {
+            displayName = "所有语言"
         }
-        binding.toolbar.setOnMenuItemClickListener { item ->
+        collapsingToolbarLayout.title = displayName
+        toolbar.inflateMenu(R.menu.menu_user_dictionary)
+        toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.item_new -> Unit
+                R.id.item_new -> {
+                    findNavController().navigate(R.id.edieWordFragment)
+                }
+
                 R.id.item_clean -> {
-                    userDictionaryManager.clean()
+                    userDictionaryManager.delete(locale = locale.toString())
                     adapter.refresh()
                 }
 
@@ -166,17 +168,16 @@ class UserDictionaryFragment : Fragment() {
     }
 
     val adapter = DictionaryAdapter()
-    fun setupRecyclerView(recyclerView: RecyclerView) {
+    fun setupRecyclerView(locale: Locale) {
         val context = requireContext()
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.adapter = adapter
         val pager = Pager(
             config = PagingConfig(pageSize = 20),
             pagingSourceFactory = {
                 DictionaryPagingSource(
                     userDictionaryManager,
-                    isLocalFilter,
-                    localFilter,
+                    locale,
                 )
             }
         ).flow.cachedIn(lifecycleScope)
@@ -220,36 +221,17 @@ class UserDictionaryFragment : Fragment() {
 
     class DictionaryPagingSource(
         private val userDictionaryManager: UserDictionaryManager,
-        private val isLocalFilter: Boolean,
-        private val localFilter: String?,
+        private val locale: Locale,
     ) : PagingSource<Int, Word>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Word> {
-            Log.d("TAG", "load:${params}")
             return try {
                 val page = params.key ?: 0
                 val pageSize = params.loadSize
                 val offset = page * pageSize
-                val words = when {
-                    isLocalFilter && localFilter != null -> {
-                        userDictionaryManager.query(
-                            selection = "${UserDictionary.Words.LOCALE} = ?", selectionArgs = arrayOf(localFilter),
-                            sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
-                        )
-                    }
-
-                    isLocalFilter && localFilter == null -> {
-                        userDictionaryManager.query(
-                            selection = "${UserDictionary.Words.LOCALE} = null",
-                            sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
-                        )
-                    }
-
-                    else -> {
-                        userDictionaryManager.query(
-                            sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
-                        )
-                    }
-                }
+                val words = userDictionaryManager.query(
+                    selection = "${UserDictionary.Words.LOCALE} = ?", selectionArgs = arrayOf(locale.toString()),
+                    sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
+                )
                 val prevKey = if (page == 0) null else page - 1
                 val nextKey = if (words.size < pageSize) null else page + 1
                 LoadResult.Page(data = words, prevKey = prevKey, nextKey = nextKey)

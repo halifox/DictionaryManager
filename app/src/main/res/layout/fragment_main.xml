@@ -1,69 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/permission_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp">
+        android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/permission_warning"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IME"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="需要权限才能继续"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/btn_request_permission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="去授权"
+                android:theme="@style/Widget.Material3.Button.OutlinedButton" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/btn_ud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IME"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                android:text="本地用户词库"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="需要权限才能继续"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+                android:text="本地用户词库"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_request_permission"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/btn_gboard"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="去授权"
-            android:theme="@style/Widget.Material3.Button.OutlinedButton" />
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gboard词库"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="需要root权限"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_sg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="在线词库"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="提供商：搜狗"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+        </LinearLayout>
+
+
     </LinearLayout>
-
-
-    <Button
-        android:id="@+id/btn_ud"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="本地用户词库管理" />
-
-    <Button
-        android:id="@+id/btn_gb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="本地Gboard词库管理" />
-
-    <Button
-        android:id="@+id/btn_sg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="搜狗词库管理" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

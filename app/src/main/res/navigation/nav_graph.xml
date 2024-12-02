@@ -7,11 +7,20 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.userdictionarydemo.MainFragment"
-        android:label="Main Fragment"
-        app:destination="@id/secondFragment" />
+        android:label="词库管理器" />
 
     <fragment
-        android:id="@+id/secondFragment"
-        android:name="com.example.userdictionarydemo.UserDictionaryFragment"
-        android:label="Second Fragment" />
+        android:id="@+id/UserDictionaryLangFragment"
+        android:name="com.example.userdictionarydemo.LanguageFragment"
+        android:label="本地用户词库" />
+
+    <fragment
+        android:id="@+id/UserDictionaryFragment"
+        android:name="com.example.userdictionarydemo.DictionaryFragment" />
+
+    <fragment
+        android:id="@+id/edieWordFragment"
+        android:name="com.example.userdictionarydemo.EdieWordFragment"
+        android:label="添加" />
+
 </navigation>

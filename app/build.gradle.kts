@@ -53,5 +53,4 @@ dependencies {
     implementation("androidx.paging:paging-runtime:3.3.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.4")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.4")
-
 }
