@@ -1,7 +1,8 @@
-package com.example.userdictionarydemo
+package com.github.dictionary
 
 import android.content.ContentResolver
 import android.content.ContentValues
+import android.content.Context
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.HandlerThread
@@ -9,25 +10,38 @@ import android.provider.UserDictionary
 import android.util.Log
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
-import java.util.Locale
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 
 
-class UserDictionaryManager(val contentResolver: ContentResolver) {
-    private val handlerThread = HandlerThread("UserDictionaryManager").apply { start() }
+class UserDictionaryManager(context: Context) {
+    companion object {
+        private const val TAG = "UserDictionaryManager"
+    }
+
+    private val contentResolver = context.contentResolver
+    private val handlerThread = HandlerThread(TAG).apply { start() }
     private val handler = Handler(handlerThread.looper)
-    private val observer = object : ContentObserver(handler) {
-        override fun onChange(selfChange: Boolean) {
-            Log.d("MainActivity", "UserDictionary changed: $selfChange")
-        }
+
+    fun registerObserver(lifecycle: Lifecycle, onChange: () -> Unit) {
+        lifecycle.addObserver(observer = object : DefaultLifecycleObserver {
+            val observer = object : ContentObserver(handler) {
+                override fun onChange(selfChange: Boolean) {
+                    onChange.invoke()
+                }
+            }
+
+            override fun onStart(owner: LifecycleOwner) {
+                contentResolver.registerContentObserver(UserDictionary.Words.CONTENT_URI, true, observer)
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                contentResolver.unregisterContentObserver(observer)
+            }
+        })
     }
 
-    fun registerObserver() {
-        contentResolver.registerContentObserver(UserDictionary.Words.CONTENT_URI, true, observer)
-    }
-
-    fun unregisterObserver() {
-        contentResolver.unregisterContentObserver(observer)
-    }
 
     /**
      * @param frequency 介于 1 和 255 之间的值。值越高，频率越高。
@@ -63,7 +77,7 @@ class UserDictionaryManager(val contentResolver: ContentResolver) {
     fun query(
         projection: Array<String>? = null,
         selection: String? = null,
-        selectionArgs: Array<String>? = null,
+        selectionArgs: Array<String?>? = null,
         sortOrder: String? = null,
     ): List<Word> {
         val words = mutableListOf<Word>()
@@ -112,7 +126,7 @@ class UserDictionaryManager(val contentResolver: ContentResolver) {
 
 
     fun clean() {
-        contentResolver.delete(UserDictionary.Words.CONTENT_URI,null,null)
+        contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
     }
 
     fun selection(
@@ -177,5 +191,12 @@ class UserDictionaryManager(val contentResolver: ContentResolver) {
         return locales.toList()
     }
 
+    data class Word(
+        val word: String? = null,
+        val frequency: Int? = null,
+        val locale: String? = null,
+        val appid: Int? = null,
+        val shortcut: String? = null,
+    )
 
 }

@@ -1,4 +1,4 @@
-package com.example.userdictionarydemo
+package com.github.dictionary
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,13 +8,12 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.userdictionarydemo.databinding.FragmentLanguageBinding
-import com.example.userdictionarydemo.databinding.ItemLanguageBinding
+import com.github.dictionary.databinding.FragmentLanguageBinding
+import com.github.dictionary.databinding.ItemLanguageBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -100,7 +99,7 @@ class LanguageFragment : Fragment() {
                 binding.displayName.text = displayName
                 binding.identifier.text = identifier
                 binding.root.setOnClickListener {
-                    findNavController().navigate(R.id.UserDictionaryFragment, bundleOf("languageTag" to languageTag))
+                    findNavController().navigate(R.id.DictionaryFragment, bundleOf(DictionaryFragment.LANGUAGE_TAG to languageTag))
                 }
             }
         }

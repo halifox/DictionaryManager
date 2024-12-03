@@ -1,4 +1,4 @@
-package com.example.userdictionarydemo
+package com.github.dictionary
 
 import android.inputmethodservice.InputMethodService
 import android.view.View

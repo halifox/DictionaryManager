@@ -1,4 +1,4 @@
-package com.example.userdictionarydemo
+package com.github.dictionary
 
 import android.util.Log
 import java.io.EOFException
@@ -8,9 +8,10 @@ import java.io.RandomAccessFile
 /**
  * 处理搜狗词库文件（.scel文件）的类，提供对词条的提取和处理。
  */
-class Sogou {
+class Sogou : FileImporter.Parser {
     companion object {
         private const val TAG = "Sogou"
+        const val suffix = ".scel"
     }
 
     /**
@@ -19,8 +20,8 @@ class Sogou {
      * @param dictionaryFile 搜狗词库文件。
      * @return 包含所有词条的序列。
      */
-    fun extractEntriesFromScelFile(dictionaryFile: File): List<WordEntry> {
-        RandomAccessFile(dictionaryFile, "r").use { file ->
+    override fun parse(file: File): List<FileImporter.WordEntry> {
+        RandomAccessFile(file, "r").use { file ->
             try {
                 file.seek(4) // 跳过文件头的前4字节
                 val headerByte = file.readUnsignedByte()
@@ -80,8 +81,8 @@ class Sogou {
         file: RandomAccessFile,
         wordDataOffset: Long,
         pinyinMapping: Map<Int, String>,
-    ): List<WordEntry> {
-        val wordEntries = mutableListOf<WordEntry>()
+    ): List<FileImporter.WordEntry> {
+        val wordEntries = mutableListOf<FileImporter.WordEntry>()
         try {
             file.seek(wordDataOffset) // 定位到汉字数据起始位置
             while (true) {
@@ -94,7 +95,7 @@ class Sogou {
                     val wordLength = file.readUnsignedLittleEndianShort() // 读取词语长度
                     val word = file.readUtf16String(wordLength) // 读取词语
                     file.skipBytes(12) // 跳过无关的字节
-                    wordEntries.add(WordEntry(word, pinyinList, pinyinList.joinToString(""))) // 返回词条
+                    wordEntries.add(FileImporter.WordEntry(word, pinyinList, pinyinList.joinToString(""))) // 返回词条
                 }
             }
         } catch (e: Exception) {

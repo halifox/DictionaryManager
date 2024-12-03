@@ -6,21 +6,25 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.userdictionarydemo.MainFragment"
+        android:name="com.github.dictionary.MainFragment"
         android:label="词库管理器" />
 
     <fragment
-        android:id="@+id/UserDictionaryLangFragment"
-        android:name="com.example.userdictionarydemo.LanguageFragment"
+        android:id="@+id/LanguageFragment"
+        android:name="com.github.dictionary.LanguageFragment"
         android:label="本地用户词库" />
 
     <fragment
-        android:id="@+id/UserDictionaryFragment"
-        android:name="com.example.userdictionarydemo.DictionaryFragment" />
+        android:id="@+id/DictionaryFragment"
+        android:name="com.github.dictionary.DictionaryFragment" />
 
     <fragment
         android:id="@+id/edieWordFragment"
-        android:name="com.example.userdictionarydemo.EdieWordFragment"
+        android:name="com.github.dictionary.EditWordFragment"
         android:label="添加" />
+    <fragment
+        android:id="@+id/SogouFragment"
+        android:name="com.github.dictionary.SogouFragment"
+        android:label="搜狗词库" />
 
 </navigation>

@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,7 +12,7 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/permission_warning"
+            android:id="@+id/ime_permission_warning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -44,7 +45,7 @@
 
 
             <Button
-                android:id="@+id/btn_request_permission"
+                android:id="@+id/ime_request_permission"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
@@ -52,6 +53,47 @@
                 android:theme="@style/Widget.Material3.Button.OutlinedButton" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/notification_permission_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="通知权限"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="需要权限才能继续"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/notification_request_permission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="去授权"
+                android:theme="@style/Widget.Material3.Button.OutlinedButton" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/btn_ud"

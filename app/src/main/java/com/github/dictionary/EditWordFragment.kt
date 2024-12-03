@@ -1,15 +1,15 @@
-package com.example.userdictionarydemo
+package com.github.dictionary
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.userdictionarydemo.databinding.FragmentEditWordBinding
+import com.github.dictionary.databinding.FragmentEditWordBinding
 
-class EdieWordFragment : Fragment() {
+class EditWordFragment : Fragment() {
     companion object {
-        private const val TAG = "DictionaryFragment"
+        private const val TAG = "EditWordFragment"
     }
 
     private var _binding: FragmentEditWordBinding? = null
