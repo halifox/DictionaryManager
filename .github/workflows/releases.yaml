@@ -24,6 +24,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
+        env:
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: ./gradlew assembleRelease
 
       - name: Publish release
