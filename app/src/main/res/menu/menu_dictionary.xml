@@ -4,15 +4,16 @@
     <item
         android:id="@+id/item_add"
         android:icon="@drawable/baseline_add_24"
-        android:title="添加" />
+        android:title="@string/menu_dictionary_add"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/item_import"
+        android:title="@string/menu_dictionary_import" />
+    <item
+        android:id="@+id/item_export"
+        android:title="@string/menu_dictionary_export" />
     <item
         android:id="@+id/item_clean"
         android:icon="@drawable/baseline_add_24"
-        android:title="清空" />
-    <item
-        android:id="@+id/item_import"
-        android:title="导入" />
-    <item
-        android:id="@+id/item_export"
-        android:title="导出" />
+        android:title="@string/menu_dictionary_clean" />
 </menu>

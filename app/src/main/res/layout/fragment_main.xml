@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
@@ -22,8 +20,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp">
@@ -31,14 +27,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="IME"
+                    android:text="@string/tq_ime_permission"
                     android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="需要权限才能继续"
+                    android:text="@string/tq_ime_permission_statement"
                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
             </LinearLayout>
@@ -49,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:text="去授权"
+                android:text="@string/request_permission"
                 android:theme="@style/Widget.Material3.Button.OutlinedButton" />
         </LinearLayout>
 
@@ -64,8 +60,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp">
@@ -73,14 +67,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="通知权限"
+                    android:text="@string/tq_notification_permission"
                     android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="需要权限才能继续"
+                    android:text="@string/tq_notification_permission_statement"
                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
             </LinearLayout>
@@ -91,16 +85,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:text="去授权"
+                android:text="@string/request_permission"
                 android:theme="@style/Widget.Material3.Button.OutlinedButton" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/btn_ud"
+            android:id="@+id/btn_user_dictionary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp">
@@ -108,14 +101,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="本地用户词库"
+                android:text="@string/td_user_dictionary"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="本地用户词库"
+                android:text="@string/td_user_dictionary_statement"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
         </LinearLayout>
@@ -125,7 +118,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp">
@@ -133,24 +125,23 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Gboard词库"
+                android:text="@string/td_gboard"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="需要root权限"
+                android:text="@string/btn_gboard_statement"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/btn_sg"
+            android:id="@+id/btn_sogou"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp">
@@ -158,14 +149,63 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="在线词库"
+                android:text="@string/td_sogou"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="提供商：搜狗"
+                android:text="@string/td_statement"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/btn_xunfei"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/td_xunfei"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/td_statement"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_baidu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/td_baidu"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/td_statement"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
         </LinearLayout>

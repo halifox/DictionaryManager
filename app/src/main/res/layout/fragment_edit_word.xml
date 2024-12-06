@@ -1,6 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:helperText="@string/td_edit_word_statement">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/word"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/td_edit_word" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:helperText="@string/td_edit_shortcut_statement">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shortcut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/td_edit_shortcut" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:helperText="@string/td_edit_frequency_statement">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/frequency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/td_edit_frequency"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            app:helperText="@string/td_edit_locale_statement">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/locale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/td_edit_locale" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            app:helperText="@string/td_edit_appid_statement">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/appid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/td_edit_appid" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/td_edit_save" />
+
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/td_edit_delete" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

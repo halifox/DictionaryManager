@@ -11,16 +11,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.github.dictionary.databinding.FragmentMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
 
 
@@ -57,12 +56,26 @@ class MainFragment : Fragment() {
                 }
             }
         }
-        binding.btnUd.setOnClickListener {
+        binding.btnUserDictionary.setOnClickListener {
             findNavController().navigate(R.id.LanguageFragment)
         }
-        binding.btnSg.setOnClickListener {
-            findNavController().navigate(R.id.SogouFragment)
+        binding.btnGboard.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.dialog_dev_titile)
+                .setMessage(R.string.dialog_dev_message)
+                .setPositiveButton(R.string.dialog_yes) { _, _ -> }
+                .show()
         }
+        binding.btnSogou.setOnClickListener {
+            findNavController().navigate(R.id.sogouFragment)
+        }
+        binding.btnXunfei.setOnClickListener {
+            findNavController().navigate(R.id.xunfeiFragment)
+        }
+        binding.btnBaidu.setOnClickListener {
+            findNavController().navigate(R.id.baiduFragment)
+        }
+
     }
 
     override fun onStart() {

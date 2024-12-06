@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dictionary Manager</string>
+    <string name="btn_gboard_statement">Root permission required</string>
+    <string name="request_permission">Grant</string>
+    <string name="td_baidu">Baidu Online Dictionary</string>
+    <string name="td_gboard">Gboard Dictionary</string>
+    <string name="td_sogou">Sogou Online Dictionary</string>
+    <string name="td_statement">Disclaimer: This data is for learning and communication purposes only</string>
+    <string name="td_user_dictionary">Personal Dictionary</string>
+    <string name="td_user_dictionary_statement">Personal Dictionary</string>
+    <string name="td_xunfei">iFLYTEK Online Dictionary</string>
+    <string name="tq_ime_permission">Enable Input Method Settings</string>
+    <string name="tq_ime_permission_statement">The app needs access to and modify your user dictionary. Please authorize access.</string>
+    <string name="tq_notification_permission">Notification Permission</string>
+    <string name="tq_notification_permission_statement">To show progress during download and import, please allow the app to send notifications.</string>
+    <string name="menu_dictionary_add">Add</string>
+    <string name="menu_dictionary_clean">Clear</string>
+    <string name="menu_dictionary_import">Import</string>
+    <string name="menu_dictionary_export">Export</string>
+    <string name="menu_dictionary_search">Search</string>
+    <string name="menu_dictionary_clean_all">Clear All Dictionaries</string>
+    <string name="td_all_languages">All languages</string>
+    <string name="btn_item_dictionary_index_install">install</string>
+    <string name="dialog_clean_all_title">Delete</string>
+    <string name="dialog_clean_all_message">Are you sure you want to delete all item?</string>
+    <string name="dialog_clean_all_yes">Yes</string>
+    <string name="dialog_clean_all_no">No</string>
+    <string name="dialog_dev_titile">In Development</string>
+    <string name="dialog_dev_message">This feature is under development. Stay tuned!</string>
+    <string name="dialog_yes">OK</string>
+    <string name="notification_task_complete">Addition Complete</string>
+    <string name="notification_task_start">Adding to dictionary...</string>
+    <string name="notification_task_exception">Unable to parse the file:\n%1$s</string>
+    <string name="notification_task_parser">Parsing file...</string>
+    <string name="notification_name">Task Progress</string>
+    <string name="notification_description">Used to display progress during download and import</string>
+    <string name="dialog_add_word_error_message">Word cannot be empty</string>
+    <string name="dialog_add_error_titile">Addition Failed</string>
+    <string name="dialog_add_frequency_error_message">Frequency parameter error. It must be a value between 1 and 255.</string>
+    <string name="td_edit_word_statement">Word</string>
+    <string name="td_edit_word">Word</string>
+    <string name="td_edit_shortcut_statement">The optional shortcut for this word. When typing the shortcut, supported IMEs should also suggest the word in this line as an alternative spelling.</string>
+    <string name="td_edit_shortcut">Shortcut</string>
+    <string name="td_edit_frequency_statement">The display frequency of this word, with a value between 1 and 255. The higher the value, the higher the frequency.</string>
+    <string name="td_edit_frequency">Frequency</string>
+    <string name="td_edit_locale_statement">The locale of this word. If it is related to all locales, it is null. The locale is defined by the string returned from Locale.toString().</string>
+    <string name="td_edit_locale">Locale</string>
+    <string name="td_edit_appid_statement">The uid of the application that inserts the word</string>
+    <string name="td_edit_appid">App ID</string>
+    <string name="td_edit_save">Save</string>
+    <string name="td_edit_delete">Delete</string>
+
+</resources>

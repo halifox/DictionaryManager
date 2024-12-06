@@ -1,6 +1,5 @@
 package com.github.dictionary
 
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
@@ -71,6 +70,9 @@ class UserDictionaryManager(context: Context) {
                 put(UserDictionary.Words.APP_ID, appid)//def:0
             }
         }
+        if (BuildConfig.DEBUG) {
+            Log.d("insert", "Word: $word, Frequency: $frequency locale:$locale appid:$appid shortcut:$shortcut")
+        }
         contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
     }
 
@@ -94,22 +96,50 @@ class UserDictionaryManager(context: Context) {
                 val locale = cursor.getStringOrNull(cursor.getColumnIndex(UserDictionary.Words.LOCALE))
                 val appid = cursor.getIntOrNull(cursor.getColumnIndex(UserDictionary.Words.APP_ID))
                 val shortcut = cursor.getStringOrNull(cursor.getColumnIndex(UserDictionary.Words.SHORTCUT))
-                Log.d("queryDictionary", "Word: $word, Frequency: $frequency locale:$locale appid:$appid shortcut:$shortcut")
+                if (BuildConfig.DEBUG) {
+                    Log.d("query", "Word: $word, Frequency: $frequency locale:$locale appid:$appid shortcut:$shortcut")
+                }
                 words.add(Word(word, frequency, locale, appid, shortcut))
             }
         }
         return words.toList()
     }
 
-    fun update(word: String, newFrequency: Int) {
+    fun update(
+        word: String? = null,
+        shortcut: String? = null,
+        frequency: Int? = null,
+        locale: String? = null,
+        appid: Int? = null,
+        newWord: String,
+        newShortcut: String? = null,
+        newFrequency: Int? = null,
+        newLocale: String? = null,
+        newAppid: Int? = null,
+    ) {
         val values = ContentValues().apply {
-            put(UserDictionary.Words.FREQUENCY, newFrequency)
+            put(UserDictionary.Words.WORD, newWord)
+            if (newShortcut != null) {
+                put(UserDictionary.Words.SHORTCUT, newShortcut)//def:null
+            }
+            if (newFrequency != null) {
+                put(UserDictionary.Words.FREQUENCY, newFrequency)//def:1
+            }
+            if (newLocale != null) {
+                put(UserDictionary.Words.LOCALE, newLocale)//def:null
+            }
+            if (newAppid != null) {
+                put(UserDictionary.Words.APP_ID, newAppid)//def:0
+            }
         }
+
+
+        val (selection, selectionArgs) = selection(word, shortcut, frequency, locale, appid)
         contentResolver.update(
             UserDictionary.Words.CONTENT_URI,
             values,
-            "${UserDictionary.Words.WORD} = ?",
-            arrayOf(word)
+            selection,
+            selectionArgs
         )
     }
 

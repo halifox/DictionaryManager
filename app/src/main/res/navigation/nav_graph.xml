@@ -7,12 +7,12 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.github.dictionary.MainFragment"
-        android:label="词库管理器" />
+        android:label="@string/app_name" />
 
     <fragment
         android:id="@+id/LanguageFragment"
         android:name="com.github.dictionary.LanguageFragment"
-        android:label="本地用户词库" />
+        android:label="@string/td_user_dictionary" />
 
     <fragment
         android:id="@+id/DictionaryFragment"
@@ -21,10 +21,17 @@
     <fragment
         android:id="@+id/edieWordFragment"
         android:name="com.github.dictionary.EditWordFragment"
-        android:label="添加" />
+        android:label="@string/menu_dictionary_add" />
     <fragment
-        android:id="@+id/SogouFragment"
+        android:id="@+id/sogouFragment"
         android:name="com.github.dictionary.SogouFragment"
-        android:label="搜狗词库" />
-
+        android:label="@string/td_sogou" />
+    <fragment
+        android:id="@+id/xunfeiFragment"
+        android:name="com.github.dictionary.XunfeiFragment"
+        android:label="@string/td_xunfei" />
+    <fragment
+        android:id="@+id/baiduFragment"
+        android:name="com.github.dictionary.BaiduFragment"
+        android:label="@string/td_baidu" />
 </navigation>

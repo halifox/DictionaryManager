@@ -1,6 +1,13 @@
-package com.github.dictionary
+package com.github.dictionary.importer
 
+import android.accounts.AccountManager
+import android.app.DownloadManager
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.util.Log
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.io.EOFException
 import java.io.File
 import java.io.RandomAccessFile
@@ -8,10 +15,26 @@ import java.io.RandomAccessFile
 /**
  * 处理搜狗词库文件（.scel文件）的类，提供对词条的提取和处理。
  */
-class Sogou : FileImporter.Parser {
+class Sogou : DictionaryImporter.Parser, DictionaryImporter.Downloader, KoinComponent {
     companion object {
         private const val TAG = "Sogou"
-        const val suffix = ".scel"
+        const val EXTENSION = "scel"
+    }
+
+    private val downloadManager by inject<DownloadManager>()
+
+    override fun download(id: Int, name: String) {
+        val request = DownloadManager.Request(Uri.parse("https://pinyin.sogou.com/dict/download_cell.php?id=$id&name=$name"))
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${name}.${EXTENSION}")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            request.setNotificationVisibility(AccountManager.VISIBILITY_VISIBLE)
+        }
+        downloadManager.enqueue(request)
+    }
+
+
+    override fun verify(file: File): Boolean {
+        return file.extension == EXTENSION
     }
 
     /**
@@ -20,7 +43,7 @@ class Sogou : FileImporter.Parser {
      * @param dictionaryFile 搜狗词库文件。
      * @return 包含所有词条的序列。
      */
-    override fun parse(file: File): List<FileImporter.WordEntry> {
+    override fun parse(file: File): List<DictionaryImporter.Entry> {
         RandomAccessFile(file, "r").use { file ->
             try {
                 file.seek(4) // 跳过文件头的前4字节
@@ -81,8 +104,8 @@ class Sogou : FileImporter.Parser {
         file: RandomAccessFile,
         wordDataOffset: Long,
         pinyinMapping: Map<Int, String>,
-    ): List<FileImporter.WordEntry> {
-        val wordEntries = mutableListOf<FileImporter.WordEntry>()
+    ): List<DictionaryImporter.Entry> {
+        val wordEntries = mutableListOf<DictionaryImporter.Entry>()
         try {
             file.seek(wordDataOffset) // 定位到汉字数据起始位置
             while (true) {
@@ -95,7 +118,7 @@ class Sogou : FileImporter.Parser {
                     val wordLength = file.readUnsignedLittleEndianShort() // 读取词语长度
                     val word = file.readUtf16String(wordLength) // 读取词语
                     file.skipBytes(12) // 跳过无关的字节
-                    wordEntries.add(FileImporter.WordEntry(word, pinyinList, pinyinList.joinToString(""))) // 返回词条
+                    wordEntries.add(DictionaryImporter.Entry(word, pinyinList, pinyinList.joinToString(""))) // 返回词条
                 }
             }
         } catch (e: Exception) {

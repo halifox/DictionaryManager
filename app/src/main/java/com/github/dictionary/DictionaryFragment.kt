@@ -1,23 +1,18 @@
 package com.github.dictionary
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.database.ContentObserver
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.provider.UserDictionary
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -28,17 +23,15 @@ import androidx.paging.cachedIn
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.blankj.utilcode.util.ReflectUtils
-import com.blankj.utilcode.util.UriUtils
 import com.github.dictionary.databinding.FragmentDictionaryBinding
 import com.github.dictionary.databinding.ItemWordBinding
+import com.github.dictionary.importer.DictionaryImporter
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import kotlinx.coroutines.Dispatchers
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
-import java.io.File
+import java.lang.ref.WeakReference
 import java.util.Locale
 
 
@@ -48,12 +41,13 @@ class DictionaryFragment : Fragment() {
         const val LANGUAGE_TAG = "LANGUAGE_TAG"
     }
 
-    private val locale by lazy { Locale.forLanguageTag(requireArguments().getString(LANGUAGE_TAG, Locale.ROOT.toLanguageTag())) }
+    private val languageTag by lazy { requireArguments().getString(LANGUAGE_TAG, Locale.ROOT.toLanguageTag()) }
+    private val locale by lazy { Locale.forLanguageTag(languageTag) }
 
+    private val importer by inject<DictionaryImporter>()
     private val userDictionaryManager by inject<UserDictionaryManager>()
-    private val adapter = DictionaryAdapter()
-
-    private val importer by inject<FileImporter>()
+    private val adapter = DictionaryAdapter(::updateDictionary)
+    private val _adapter = WeakReference(adapter)
 
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
@@ -78,27 +72,19 @@ class DictionaryFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val uri = it.data?.data
             if (uri != null && locale != null) {
-                importer.addImportTask(FileImporter.Task(uri, locale))
+                val task = DictionaryImporter.Task(uri, locale) {
+                    _adapter.get()?.refresh()
+                }
+                importer.addImportTask(task)
             }
         }
-
-    private fun importDictionaryFile() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "*/*")
-        }
-        importDictionaryFileLauncher.launch(intent)
-    }
-
-    private fun exportDictionaryFile() {
-
-    }
 
 
     private fun setupToolbar(locale: Locale) {
         val collapsingToolbarLayout = requireActivity().findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar_layout)
         var displayName = locale.getDisplayName()
         if (locale == Locale.ROOT) {
-            displayName = "所有语言"
+            displayName = getString(R.string.td_all_languages)
         }
         collapsingToolbarLayout.title = displayName
 
@@ -116,12 +102,50 @@ class DictionaryFragment : Fragment() {
     }
 
     private fun addDictionary() {
-        findNavController().navigate(R.id.edieWordFragment)
+        val bundle = Bundle().apply {
+            putInt("type", EditWordFragment.TYPE_ADD)
+            putString("locale", locale.toString())
+        }
+        findNavController().navigate(R.id.edieWordFragment, bundle)
+    }
+
+    private fun updateDictionary(word: UserDictionaryManager.Word) {
+        val bundle = Bundle().apply {
+            putInt("type", EditWordFragment.TYPE_UPDATE)
+            putString("word", word.word)
+            putInt("frequency", word.frequency ?: 0)
+            putString("locale", word.locale)
+            putInt("appid", word.appid ?: 0)
+            putString("shortcut", word.shortcut)
+        }
+        findNavController().navigate(R.id.edieWordFragment, bundle)
     }
 
     private fun cleanDictionary() {
-        userDictionaryManager.delete(locale = locale.toString())
-        adapter.refresh()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_clean_all_title)
+            .setMessage(R.string.dialog_clean_all_message)
+            .setPositiveButton(R.string.dialog_clean_all_yes) { _, _ ->
+                userDictionaryManager.delete(locale = locale.toString())
+                adapter.refresh()
+            }
+            .setNegativeButton(R.string.dialog_clean_all_no) { _, _ -> }
+            .show()
+    }
+
+    private fun importDictionaryFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "*/*")
+        }
+        importDictionaryFileLauncher.launch(intent)
+    }
+
+    private fun exportDictionaryFile() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_dev_titile)
+            .setMessage(R.string.dialog_dev_message)
+            .setPositiveButton(R.string.dialog_yes) { _, _ -> }
+            .show()
     }
 
     private fun setupRecyclerView(context: Context, locale: Locale) {
@@ -138,7 +162,7 @@ class DictionaryFragment : Fragment() {
         }
     }
 
-    class DictionaryAdapter : PagingDataAdapter<UserDictionaryManager.Word, DictionaryAdapter.WordViewHolder>(WordDiffCallback()) {
+    class DictionaryAdapter(private val updateDictionary: (UserDictionaryManager.Word) -> Unit) : PagingDataAdapter<UserDictionaryManager.Word, DictionaryAdapter.WordViewHolder>(WordDiffCallback()) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordViewHolder {
             val binding = ItemWordBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -146,23 +170,26 @@ class DictionaryFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
-            holder.bind(getItem(position))
+            holder.bind(getItem(position), updateDictionary)
         }
 
         class WordViewHolder(private val binding: ItemWordBinding) : RecyclerView.ViewHolder(binding.root) {
-            fun bind(word:UserDictionaryManager.Word?) {
+            fun bind(word: UserDictionaryManager.Word?, updateDictionary: (UserDictionaryManager.Word) -> Unit) {
                 if (word == null) return
                 binding.word.text = "${word.word}"
                 binding.shortcut.text = "${word.shortcut}"
+                binding.root.setOnClickListener {
+                    updateDictionary(word)
+                }
             }
         }
 
         class WordDiffCallback : DiffUtil.ItemCallback<UserDictionaryManager.Word>() {
-            override fun areItemsTheSame(oldItem:UserDictionaryManager.Word, newItem:UserDictionaryManager.Word): Boolean {
+            override fun areItemsTheSame(oldItem: UserDictionaryManager.Word, newItem: UserDictionaryManager.Word): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem:UserDictionaryManager.Word, newItem:UserDictionaryManager.Word): Boolean {
+            override fun areContentsTheSame(oldItem: UserDictionaryManager.Word, newItem: UserDictionaryManager.Word): Boolean {
                 return oldItem == newItem
             }
         }
@@ -172,14 +199,12 @@ class DictionaryFragment : Fragment() {
     class DictionaryPagingSource(
         private val userDictionaryManager: UserDictionaryManager,
         private val locale: Locale,
-    ) : PagingSource<Int,UserDictionaryManager.Word>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int,UserDictionaryManager.Word> {
+    ) : PagingSource<Int, UserDictionaryManager.Word>() {
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserDictionaryManager.Word> {
             return try {
                 val page = params.key ?: 0
                 val pageSize = params.loadSize
                 val offset = page * pageSize
-                Log.d(TAG, "load: ${locale}")
-                Log.d(TAG, "load: ${locale == Locale.ROOT}")
                 val words = if (locale == Locale.ROOT) {
                     userDictionaryManager.query(
                         selection = "${UserDictionary.Words.LOCALE} is NULL",
@@ -192,8 +217,6 @@ class DictionaryFragment : Fragment() {
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
                 }
-                Log.d(TAG, "words: ${words}")
-
                 val prevKey = if (page == 0) null else page - 1
                 val nextKey = if (words.size < pageSize) null else page + 1
                 LoadResult.Page(data = words, prevKey = prevKey, nextKey = nextKey)
@@ -202,7 +225,7 @@ class DictionaryFragment : Fragment() {
             }
         }
 
-        override fun getRefreshKey(state: PagingState<Int,UserDictionaryManager.Word>): Int? {
+        override fun getRefreshKey(state: PagingState<Int, UserDictionaryManager.Word>): Int? {
             return null
         }
     }
