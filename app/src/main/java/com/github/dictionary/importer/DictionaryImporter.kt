@@ -98,7 +98,7 @@ class DictionaryImporter(
                     val items = parser.parse(cacheFile)
                     callback.onStart()
                     items.forEachIndexed { index, wordEntry ->
-                        userDictionaryManager.insert(wordEntry.word, wordEntry.pinyin, locale = task.locale.toString())
+                        userDictionaryManager.insert(wordEntry.word, wordEntry.pinyin, 250, task.locale.toString(), 0)
                         callback.onProgress(index, items.size)
                     }
                     callback.onComplete()
@@ -136,7 +136,7 @@ class DictionaryImporter(
         val onComplete: () -> Unit = {},
     )
 
-    interface Downloader{
+    interface Downloader {
         fun download(id: Int, name: String)
     }
 

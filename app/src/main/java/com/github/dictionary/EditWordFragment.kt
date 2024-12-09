@@ -43,9 +43,9 @@ class EditWordFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val type = requireArguments().getInt("type")
         val word = requireArguments().getString("word")
-        val frequency = requireArguments().getInt("frequency", 1)
+        val frequency = requireArguments().getInt("frequency", 250)
         val locale = requireArguments().getString("locale")
-        val appid = requireArguments().getInt("appid", getUid(requireContext()))
+        val appid = requireArguments().getInt("appid", 0)
         val shortcut = requireArguments().getString("shortcut")
 
         binding.word.setText(word)
