@@ -12,15 +12,20 @@
 - 提供高效的离线词典查询功能。
 - 支持自定义词库格式的导入和导出。
 
+## 设计与规范
+
+- [Google Android 开发规范](https://developer.android.com/docs)
+- [Material Design 3](https://m3.material.io/)
+- [动态色彩](https://developer.android.com/develop/ui/views/theming/dynamic-colors)
+- [自适应图标](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive)
+
 ## 截图
 
 ![](./screenshot/Screenshot.png)
 
 ## 安装
 
-### 手动安装
-
-1. 下载 [APK文件](https://github.com/halifox/DictionaryManager/releases)。
+1. 从 [releases](https://github.com/halifox/DictionaryManager/releases) 下载 APK 文件。
 2. 在安卓设备上启用安装来自未知来源的应用。
 3. 安装APK文件。
 
