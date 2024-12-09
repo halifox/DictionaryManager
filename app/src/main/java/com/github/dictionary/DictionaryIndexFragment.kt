@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -25,6 +27,7 @@ import com.github.dictionary.databinding.ItemDictionaryIndexBinding
 import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinComponent
 
 abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
@@ -45,6 +48,7 @@ abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
     abstract fun toDictionaryWord(index: Index?): DictionaryWord?
     abstract fun download(id: Int, name: String)
 
+    private val inputMethodManager by inject<InputMethodManager>()
     protected var keyword = "%"
     protected val adapter = DictionaryAdapter(::toDictionaryWord, ::download)
 
@@ -55,6 +59,12 @@ abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
         binding.keyword.addTextChangedListener {
             keyword = "%${it ?: ""}%"
             adapter.refresh()
+        }
+        binding.keyword.setOnEditorActionListener { v, actionId, event ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+                else -> false
+            }
         }
     }
 

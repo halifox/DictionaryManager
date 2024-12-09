@@ -8,6 +8,8 @@ import android.provider.UserDictionary
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
@@ -48,6 +50,7 @@ class DictionaryFragment : Fragment() {
 
     private val importer by inject<DictionaryImporter>()
     private val userDictionaryManager by inject<UserDictionaryManager>()
+    private val inputMethodManager by inject<InputMethodManager>()
     private val adapter = DictionaryAdapter(::updateDictionary)
     private val _adapter = WeakReference(adapter)
 
@@ -73,6 +76,12 @@ class DictionaryFragment : Fragment() {
         binding.keyword.addTextChangedListener {
             keyword = "%${it ?: ""}%"
             adapter.refresh()
+        }
+        binding.keyword.setOnEditorActionListener { v, actionId, event ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+                else -> false
+            }
         }
     }
 
