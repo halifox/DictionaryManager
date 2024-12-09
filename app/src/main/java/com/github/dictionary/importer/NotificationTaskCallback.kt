@@ -26,7 +26,7 @@ class NotificationTaskCallback(val context: Context, val id: Int) : DictionaryIm
         .setVibrationEnabled(false)
 
     private val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_search)
+        .setSmallIcon(R.drawable.publish_24px)
         .setProgress(0, 0, true)
 
     private fun notify0() {
