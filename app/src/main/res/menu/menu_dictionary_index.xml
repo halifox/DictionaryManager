@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/search_bar"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/search_24px"
         android:title="@string/menu_dictionary_search"
         app:showAsAction="always" />
 </menu>
