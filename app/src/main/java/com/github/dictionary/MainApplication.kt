@@ -9,6 +9,7 @@ import androidx.core.content.getSystemService
 import androidx.room.Room
 import com.github.dictionary.db.AppDatabase
 import com.github.dictionary.importer.DictionaryImporter
+import com.google.android.material.color.DynamicColors
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -18,7 +19,7 @@ import org.koin.dsl.module
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-
+        DynamicColors.applyToActivitiesIfAvailable(this)
         startKoin {
             androidLogger()
             androidContext(this@MainApplication)
