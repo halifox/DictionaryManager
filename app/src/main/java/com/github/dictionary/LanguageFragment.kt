@@ -1,10 +1,12 @@
 package com.github.dictionary
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
+import androidx.core.os.ConfigurationCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -60,10 +62,13 @@ class LanguageFragment : Fragment() {
             val locales = buildList<Locale> {
                 add(Locale.ROOT)
                 val localLocales = buildSet<Locale> {
-                    val localLocales = resources.configuration.getLocales()
+                    val localLocales = ConfigurationCompat.getLocales(resources.configuration)
                     repeat(localLocales.size()) {
                         val locale = localLocales.get(it)
-                        add(Locale(locale.language, locale.country))
+                        Log.d(TAG, "localLocales:${it} ${locale} ${locale?.toLanguageTag()}")
+                        if (locale != null) {
+                            add(Locale(locale.language, locale.country))
+                        }
                     }
                 }
                 addAll(localLocales.toList())

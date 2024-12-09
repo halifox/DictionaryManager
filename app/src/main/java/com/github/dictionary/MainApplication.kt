@@ -3,6 +3,7 @@ package com.github.dictionary
 import android.app.Application
 import android.app.DownloadManager
 import android.app.NotificationManager
+import android.view.inputmethod.InputMethodManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.room.Room
@@ -32,6 +33,7 @@ class MainApplication : Application() {
                     single { get<AppDatabase>().sogouDao() }
                     single { get<AppDatabase>().xunfeiDao() }
                     single { get<AppDatabase>().baiduDao() }
+                    single { getSystemService<InputMethodManager>() }
                     single { getSystemService<DownloadManager>() }
                     single { getSystemService<NotificationManager>() }
                     single { NotificationManagerCompat.from(get()) }
