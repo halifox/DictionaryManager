@@ -97,16 +97,6 @@ class LanguageFragment : Fragment() {
     }
 
 
-    class Callback : DiffUtil.ItemCallback<Locale>() {
-        override fun areItemsTheSame(oldItem: Locale, newItem: Locale): Boolean {
-            return oldItem == newItem
-        }
-
-        override fun areContentsTheSame(oldItem: Locale, newItem: Locale): Boolean {
-            return oldItem == newItem
-        }
-    }
-
     inner class Adapter : ListAdapter<Locale, Adapter.WordViewHolder>(Callback()) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordViewHolder {
@@ -132,6 +122,16 @@ class LanguageFragment : Fragment() {
                     findNavController().navigate(R.id.DictionaryFragment, bundleOf(DictionaryFragment.LANGUAGE_TAG to languageTag))
                 }
             }
+        }
+    }
+
+    class Callback : DiffUtil.ItemCallback<Locale>() {
+        override fun areItemsTheSame(oldItem: Locale, newItem: Locale): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(oldItem: Locale, newItem: Locale): Boolean {
+            return oldItem == newItem
         }
     }
 }

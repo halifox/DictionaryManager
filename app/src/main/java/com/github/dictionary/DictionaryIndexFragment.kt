@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.dictionary.DictionaryIndexFragment.DictionaryAdapter.DictionaryWord
-import com.github.dictionary.databinding.FragmentSogouBinding
+import com.github.dictionary.databinding.FragmentDictionaryIndexBinding
 import com.github.dictionary.databinding.ItemDictionaryIndexBinding
 import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.flow.collectLatest
@@ -28,11 +28,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
-    private var _binding: FragmentSogouBinding? = null
+    private var _binding: FragmentDictionaryIndexBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentSogouBinding.inflate(inflater, container, false)
+        _binding = FragmentDictionaryIndexBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -59,20 +59,22 @@ abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
     }
 
     private fun setupToolbar() {
-        val appbar = requireActivity().findViewById<AppBarLayout>(R.id.appbar)
         val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.menu_dictionary_index)
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.search_bar -> {
-                    if (!binding.keywordLayout.isVisible) {
-                        appbar.setExpanded(false)
-                    }
-                    binding.keywordLayout.isVisible = !binding.keywordLayout.isVisible
-                }
+                R.id.search_bar -> showSearchBar()
             }
             true
         }
+    }
+
+    private fun showSearchBar() {
+        if (!binding.keywordLayout.isVisible) {
+            val appbar = requireActivity().findViewById<AppBarLayout>(R.id.appbar)
+            appbar.setExpanded(false)
+        }
+        binding.keywordLayout.isVisible = !binding.keywordLayout.isVisible
     }
 
 

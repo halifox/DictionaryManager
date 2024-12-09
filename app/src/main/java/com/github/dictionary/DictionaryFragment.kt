@@ -10,9 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -26,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.dictionary.databinding.FragmentDictionaryBinding
 import com.github.dictionary.databinding.ItemWordBinding
 import com.github.dictionary.importer.DictionaryImporter
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
@@ -49,6 +51,8 @@ class DictionaryFragment : Fragment() {
     private val adapter = DictionaryAdapter(::updateDictionary)
     private val _adapter = WeakReference(adapter)
 
+    private var keyword = "%"
+
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
 
@@ -66,6 +70,10 @@ class DictionaryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar(locale)
         setupRecyclerView(requireContext(), locale)
+        binding.keyword.addTextChangedListener {
+            keyword = "%${it ?: ""}%"
+            adapter.refresh()
+        }
     }
 
     private val importDictionaryFileLauncher =
@@ -96,9 +104,18 @@ class DictionaryFragment : Fragment() {
                 R.id.item_clean -> cleanDictionary()
                 R.id.item_import -> importDictionaryFile()
                 R.id.item_export -> exportDictionaryFile()
+                R.id.search_bar -> showSearchBar()
             }
             true
         }
+    }
+
+    private fun showSearchBar() {
+        if (!binding.keywordLayout.isVisible) {
+            val appbar = requireActivity().findViewById<AppBarLayout>(R.id.appbar)
+            appbar.setExpanded(false)
+        }
+        binding.keywordLayout.isVisible = !binding.keywordLayout.isVisible
     }
 
     private fun addDictionary() {
@@ -153,7 +170,7 @@ class DictionaryFragment : Fragment() {
         binding.recyclerView.adapter = adapter
         val pager = Pager(
             config = PagingConfig(pageSize = 20),
-            pagingSourceFactory = { DictionaryPagingSource(userDictionaryManager, locale) }
+            pagingSourceFactory = { DictionaryPagingSource(userDictionaryManager, locale, keyword) }
         )
             .flow
             .cachedIn(lifecycleScope)
@@ -199,6 +216,7 @@ class DictionaryFragment : Fragment() {
     class DictionaryPagingSource(
         private val userDictionaryManager: UserDictionaryManager,
         private val locale: Locale,
+        private val keyword: String,
     ) : PagingSource<Int, UserDictionaryManager.Word>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserDictionaryManager.Word> {
             return try {
@@ -207,13 +225,14 @@ class DictionaryFragment : Fragment() {
                 val offset = page * pageSize
                 val words = if (locale == Locale.ROOT) {
                     userDictionaryManager.query(
-                        selection = "${UserDictionary.Words.LOCALE} is NULL",
+                        selection = "${UserDictionary.Words.WORD} LIKE ? AND ${UserDictionary.Words.LOCALE} is NULL",
+                        selectionArgs = arrayOf(keyword),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
                 } else {
                     userDictionaryManager.query(
-                        selection = "${UserDictionary.Words.LOCALE} = ?",
-                        selectionArgs = arrayOf(locale.toString()),
+                        selection = "${UserDictionary.Words.WORD} LIKE ? AND ${UserDictionary.Words.LOCALE} = ?",
+                        selectionArgs = arrayOf(keyword, locale.toString()),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
                 }

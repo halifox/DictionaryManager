@@ -5,7 +5,12 @@
         android:id="@+id/item_add"
         android:icon="@drawable/add_24px"
         android:title="@string/menu_dictionary_add"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/search_bar"
+        android:icon="@drawable/search_24px"
+        android:title="@string/menu_dictionary_search"
+        app:showAsAction="always" />
     <item
         android:id="@+id/item_import"
         android:title="@string/menu_dictionary_import" />
