@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.github.dictionary.databinding.FragmentLanguageBinding
 import com.github.dictionary.databinding.ItemLanguageBinding
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -80,7 +80,7 @@ class LanguageFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.menu_language)
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {

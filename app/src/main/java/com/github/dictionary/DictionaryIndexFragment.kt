@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -25,6 +24,7 @@ import com.github.dictionary.DictionaryIndexFragment.DictionaryAdapter.Dictionar
 import com.github.dictionary.databinding.FragmentDictionaryIndexBinding
 import com.github.dictionary.databinding.ItemDictionaryIndexBinding
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -69,7 +69,7 @@ abstract class DictionaryIndexFragment<Index : Any> : Fragment() {
     }
 
     private fun setupToolbar() {
-        val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.menu_dictionary_index)
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {

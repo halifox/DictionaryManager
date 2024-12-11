@@ -1,7 +1,5 @@
 package com.github.dictionary
 
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +34,6 @@ class EditWordFragment : Fragment() {
 
 
     private val userDictionaryManager by inject<UserDictionaryManager>()
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
