@@ -41,16 +41,13 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBarsInsets.left, 0, systemBarsInsets.right, systemBarsInsets.bottom)
-            insets
-        }
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.appbar) { view, insets ->
             val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                updateMargins(systemBarsInsets.left, systemBarsInsets.top, systemBarsInsets.right, systemBarsInsets.bottom)
+                updateMargins(systemBarsInsets.left, systemBarsInsets.top, systemBarsInsets.right, 0)
             }
+            binding.navHostFragment.setPadding(0, 0, 0, systemBarsInsets.top + systemBarsInsets.bottom)
             insets
         }
 
