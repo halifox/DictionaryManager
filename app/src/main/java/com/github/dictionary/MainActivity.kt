@@ -10,7 +10,12 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.NavHostFragment
@@ -38,12 +43,21 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appbar) { view, insets ->
+            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                updateMargins(systemBarsInsets.left, systemBarsInsets.top, systemBarsInsets.right, systemBarsInsets.bottom)
+            }
+            insets
+        }
+
+
         val navHostFragment = binding.navHostFragment.getFragment<NavHostFragment>()
         val navController = navHostFragment.navController
         binding.collapsingToolbarLayout.setupWithNavController(binding.toolbar, navController)
 
         navController.addOnDestinationChangedListener { navController, navDestination, bundle ->
-            clearToolbarMenu()
+            binding.toolbar.menu.clear()
         }
         addDownloadCompleteListener()
     }
@@ -86,10 +100,4 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
-    private fun clearToolbarMenu() {
-        binding.toolbar.menu.clear()
-    }
-
-
 }
