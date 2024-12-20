@@ -60,14 +60,12 @@ class LanguageFragment : Fragment() {
     private fun initLocales() {
         lifecycleScope.launch(Dispatchers.IO) {
             val locales = buildList<Locale> {
-                add(Locale.ROOT)
+                add(Locale.ROOT) // first
                 val localLocales = buildSet<Locale> {
                     val localLocales = ConfigurationCompat.getLocales(resources.configuration)
                     repeat(localLocales.size()) {
-                        val locale = localLocales.get(it)
-                        Log.d(TAG, "localLocales:${it} ${locale} ${locale?.toLanguageTag()}")
-                        if (locale != null) {
-                            add(Locale(locale.language, locale.country))
+                        localLocales.get(it)?.let { locale ->
+                            add(Locale(locale.language, locale.country, "")) // remove variant
                         }
                     }
                 }
@@ -115,16 +113,10 @@ class LanguageFragment : Fragment() {
 
         inner class WordViewHolder(private val binding: ItemLanguageBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(locale: Locale) {
-                var displayName = locale.getDisplayName()
-                if (locale == Locale.ROOT) {
-                    displayName = getString(R.string.td_all_languages)
-                }
-                val identifier = locale.toString()
-                val languageTag = locale.toLanguageTag()
-                binding.displayName.text = displayName
-                binding.identifier.text = identifier
+                binding.displayName.text = locale.displayName.ifEmpty { requireContext().getString(R.string.td_all_languages) }
+                binding.identifier.text = locale.toString()
                 binding.root.setOnClickListener {
-                    findNavController().navigate(R.id.DictionaryFragment, bundleOf(DictionaryFragment.LANGUAGE_TAG to languageTag))
+                    findNavController().navigate(R.id.dictionaryFragment, bundleOf(DictionaryFragment.LOCALE to locale))
                 }
             }
         }

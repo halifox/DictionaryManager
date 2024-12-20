@@ -15,7 +15,7 @@
         android:label="@string/td_user_dictionary" />
 
     <fragment
-        android:id="@+id/DictionaryFragment"
+        android:id="@+id/dictionaryFragment"
         android:name="com.github.dictionary.DictionaryFragment" />
 
     <fragment

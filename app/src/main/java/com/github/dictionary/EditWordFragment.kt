@@ -17,6 +17,14 @@ class EditWordFragment : Fragment() {
         private const val TAG = "EditWordFragment"
         const val TYPE_ADD = 0
         const val TYPE_UPDATE = 1
+
+
+        const val TYPE = "TYPE"
+        const val WORD = "WORD"
+        const val FREQUENCY = "FREQUENCY"
+        const val LOCALE = "LOCALE"
+        const val APPID = "APPID"
+        const val SHORTCUT = "SHORTCUT"
     }
 
     private var _binding: FragmentEditWordBinding? = null
@@ -38,12 +46,12 @@ class EditWordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val type = requireArguments().getInt("type")
-        val word = requireArguments().getString("word")
-        val frequency = requireArguments().getInt("frequency", 250)
-        val locale = requireArguments().getString("locale")
-        val appid = requireArguments().getInt("appid", 0)
-        val shortcut = requireArguments().getString("shortcut")
+        val type = requireArguments().getInt(TYPE)
+        val word = requireArguments().getString(WORD)
+        val frequency = requireArguments().getInt(FREQUENCY, 250)
+        val locale = requireArguments().getString(LOCALE)
+        val appid = requireArguments().getInt(APPID, 0)
+        val shortcut = requireArguments().getString(SHORTCUT)
 
         binding.word.setText(word)
         binding.frequency.setText(frequency.toString())

@@ -42,19 +42,8 @@ import java.util.Locale
 class DictionaryFragment : Fragment() {
     companion object {
         private const val TAG = "DictionaryFragment"
-        const val LANGUAGE_TAG = "LANGUAGE_TAG"
+        const val LOCALE = "LOCALE"
     }
-
-    private val languageTag by lazy { requireArguments().getString(LANGUAGE_TAG, Locale.ROOT.toLanguageTag()) }
-    private val locale by lazy { Locale.forLanguageTag(languageTag) }
-
-    private val importer by inject<DictionaryImporter>()
-    private val userDictionaryManager by inject<UserDictionaryManager>()
-    private val inputMethodManager by inject<InputMethodManager>()
-    private val adapter = DictionaryAdapter(::updateDictionary)
-    private val _adapter = WeakReference(adapter)
-
-    private var keyword = "%"
 
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
@@ -69,12 +58,31 @@ class DictionaryFragment : Fragment() {
         _binding = null
     }
 
+    private val locale by lazy { requireArguments().getSerializable(LOCALE) as Locale }
+
+    private val importer by inject<DictionaryImporter>()
+    private val userDictionaryManager by inject<UserDictionaryManager>()
+    private val inputMethodManager by inject<InputMethodManager>()
+    private val adapter = DictionaryAdapter(::updateDictionary)
+    private val adapterWeakReference = WeakReference(adapter)
+
+    private var keyword = ""
+
+    private val importDictionaryFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        it.data?.data?.let { uri ->
+            val task = DictionaryImporter.Task(uri, locale) {
+                adapterWeakReference.get()?.refresh()
+            }
+            importer.addImportTask(task)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar(locale)
         setupRecyclerView(requireContext(), locale)
         binding.keyword.addTextChangedListener {
-            keyword = "%${it ?: ""}%"
+            keyword = it?.toString().orEmpty()
             adapter.refresh()
         }
         binding.keyword.setOnEditorActionListener { v, actionId, event ->
@@ -85,25 +93,10 @@ class DictionaryFragment : Fragment() {
         }
     }
 
-    private val importDictionaryFileLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val uri = it.data?.data
-            if (uri != null && locale != null) {
-                val task = DictionaryImporter.Task(uri, locale) {
-                    _adapter.get()?.refresh()
-                }
-                importer.addImportTask(task)
-            }
-        }
-
 
     private fun setupToolbar(locale: Locale) {
         val collapsingToolbarLayout = requireActivity().findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar_layout)
-        var displayName = locale.getDisplayName()
-        if (locale == Locale.ROOT) {
-            displayName = getString(R.string.td_all_languages)
-        }
-        collapsingToolbarLayout.title = displayName
+        collapsingToolbarLayout.title = locale.displayName.ifEmpty { requireContext().getString(R.string.td_all_languages) }
 
         val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.menu_dictionary)
@@ -129,20 +122,20 @@ class DictionaryFragment : Fragment() {
 
     private fun addDictionary() {
         val bundle = Bundle().apply {
-            putInt("type", EditWordFragment.TYPE_ADD)
-            putString("locale", locale.toString())
+            putInt(EditWordFragment.TYPE, EditWordFragment.TYPE_ADD)
+            putString(EditWordFragment.LOCALE, locale.toString())
         }
         findNavController().navigate(R.id.edieWordFragment, bundle)
     }
 
     private fun updateDictionary(word: UserDictionaryManager.Word) {
         val bundle = Bundle().apply {
-            putInt("type", EditWordFragment.TYPE_UPDATE)
-            putString("word", word.word)
-            putInt("frequency", word.frequency ?: 0)
-            putString("locale", word.locale)
-            putInt("appid", word.appid ?: 0)
-            putString("shortcut", word.shortcut)
+            putInt(EditWordFragment.TYPE, EditWordFragment.TYPE_UPDATE)
+            putString(EditWordFragment.WORD, word.word)
+            putInt(EditWordFragment.FREQUENCY, word.frequency ?: 0)
+            putString(EditWordFragment.LOCALE, word.locale)
+            putInt(EditWordFragment.APPID, word.appid ?: 0)
+            putString(EditWordFragment.SHORTCUT, word.shortcut)
         }
         findNavController().navigate(R.id.edieWordFragment, bundle)
     }
@@ -235,13 +228,13 @@ class DictionaryFragment : Fragment() {
                 val words = if (locale == Locale.ROOT) {
                     userDictionaryManager.query(
                         selection = "${UserDictionary.Words.WORD} LIKE ? AND ${UserDictionary.Words.LOCALE} is NULL",
-                        selectionArgs = arrayOf(keyword),
+                        selectionArgs = arrayOf("%${keyword}%"),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
                 } else {
                     userDictionaryManager.query(
                         selection = "${UserDictionary.Words.WORD} LIKE ? AND ${UserDictionary.Words.LOCALE} = ?",
-                        selectionArgs = arrayOf(keyword, locale.toString()),
+                        selectionArgs = arrayOf("%${keyword}%", locale.toString()),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
                 }
