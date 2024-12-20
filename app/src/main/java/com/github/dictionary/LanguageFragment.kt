@@ -68,6 +68,7 @@ class LanguageFragment : Fragment() {
                             add(Locale(locale.language, locale.country, "")) // remove variant
                         }
                     }
+                    add(Locale.SIMPLIFIED_CHINESE) // at least once
                 }
                 addAll(localLocales.toList())
             }
