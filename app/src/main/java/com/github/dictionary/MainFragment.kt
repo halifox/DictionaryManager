@@ -24,8 +24,6 @@ import org.koin.android.ext.android.inject
 
 
 class MainFragment : Fragment() {
-    private val notificationManagerCompat by inject<NotificationManagerCompat>()
-
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
@@ -39,32 +37,51 @@ class MainFragment : Fragment() {
         _binding = null
     }
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isNotificationsEnabled ->
-            binding.notificationPermissionWarning.isVisible = !isNotificationsEnabled
+    private val notificationManager by inject<NotificationManagerCompat>()
+    private val inputMethodManager by inject<InputMethodManager>()
+
+    private val requestNotificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isNotificationsEnabled ->
+        checkNotificationsEnabled()
+    }
+
+    private fun checkNotificationsEnabled() {
+        val isNotificationsEnabled = notificationManager.areNotificationsEnabled()
+        binding.notificationPermissionWarning.isVisible = !isNotificationsEnabled
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
+    }
+
+    private fun checkInputMethodSettingsActive() {
+        val localImeService = ComponentName(requireContext(), IMEService::class.java)
+        val enabledInputMethodList = inputMethodManager.enabledInputMethodList
+        val isInputMethodSettingsActive = enabledInputMethodList.any { it.component == localImeService }
+        binding.imePermissionWarning.isVisible = !isInputMethodSettingsActive
+    }
+
+    private fun requestInputMethodSettingsActive() {
+        startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.imeRequestPermission.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+            requestInputMethodSettingsActive()
         }
         binding.notificationRequestPermission.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
+            requestNotificationPermission()
         }
         binding.btnUserDictionary.setOnClickListener {
-            findNavController().navigate(R.id.LanguageFragment)
+            findNavController().navigate(R.id.languageFragment)
         }
         binding.btnGboard.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.dialog_dev_titile)
-                .setMessage(R.string.dialog_dev_message)
-                .setPositiveButton(R.string.dialog_yes) { _, _ -> }
-                .show()
+            devDialog(requireContext())
         }
         binding.btnSogou.setOnClickListener {
             findNavController().navigate(R.id.sogouFragment)
@@ -75,18 +92,11 @@ class MainFragment : Fragment() {
         binding.btnBaidu.setOnClickListener {
             findNavController().navigate(R.id.baiduFragment)
         }
-
     }
 
     override fun onStart() {
         super.onStart()
-        val imeService = ComponentName(requireContext(), IMEService::class.java)
-        val inputMethodManager = requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        val enabledInputMethodList = inputMethodManager.enabledInputMethodList
-        val isKeyboardActive = enabledInputMethodList.any { it.component == imeService }
-        binding.imePermissionWarning.isVisible = !isKeyboardActive
-
-        val isNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
-        binding.notificationPermissionWarning.isVisible = !isNotificationsEnabled
+        checkInputMethodSettingsActive()
+        checkNotificationsEnabled()
     }
 }

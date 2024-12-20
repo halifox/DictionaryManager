@@ -10,7 +10,7 @@
         android:label="@string/app_name" />
 
     <fragment
-        android:id="@+id/LanguageFragment"
+        android:id="@+id/languageFragment"
         android:name="com.github.dictionary.LanguageFragment"
         android:label="@string/td_user_dictionary" />
 
