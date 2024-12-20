@@ -58,6 +58,6 @@
 
 ## 许可
 
-项目遵循 [MIT License](LICENSE)。
+项目遵循 [GPL-3.0 License](LICENSE)。
 
 感谢你的贡献！ 🎉
