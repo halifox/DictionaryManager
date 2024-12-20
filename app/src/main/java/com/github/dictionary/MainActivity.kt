@@ -30,12 +30,12 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
     }
 
+    private lateinit var binding: ActivityMainBinding
+
     private val context = this
     private val downloadManager by inject<DownloadManager>()
-    private val dictionaryFileImporter by inject<DictionaryImporter>()
+    private val dictionaryImporter by inject<DictionaryImporter>()
 
-
-    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,34 +63,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addDownloadCompleteListener() {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.hasExtra(DownloadManager.EXTRA_DOWNLOAD_ID)) {
                     val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
-                    if (downloadId == -1L) {
-                        return
-                    }
-                    val query = DownloadManager.Query().apply {
-                        setFilterById(downloadId)
-                    }
-                    downloadManager.query(query)?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-                            when (status) {
-                                DownloadManager.STATUS_SUCCESSFUL -> {
-                                    val uriString = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
-                                    dictionaryFileImporter.addImportTask(DictionaryImporter.Task(Uri.parse(uriString), Locale.SIMPLIFIED_CHINESE))
-                                }
-
-                                DownloadManager.STATUS_FAILED -> {
-                                    // 下载失败，处理错误
-                                }
-                            }
-                        }
-                    }
+                    handleDownloadQuery(downloadId)
                 }
             }
-
+        }
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
                 ContextCompat.registerReceiver(context, receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
             }
@@ -100,4 +81,28 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun handleDownloadQuery(downloadId: Long) {
+        val query = DownloadManager.Query().apply {
+            setFilterById(downloadId)
+        }
+        downloadManager.query(query)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                when (status) {
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        val localUri = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
+                        dictionaryImporter.addImportTask(DictionaryImporter.Task(Uri.parse(localUri), Locale.SIMPLIFIED_CHINESE))
+                    }
+
+                    DownloadManager.STATUS_FAILED -> {
+                        // 下载失败，处理错误
+                        //TODO
+                    }
+                }
+            }
+        }
+    }
+
+
 }
