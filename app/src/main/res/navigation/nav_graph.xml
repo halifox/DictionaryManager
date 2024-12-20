@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/edieWordFragment"
         android:name="com.github.dictionary.EditWordFragment"
-        android:label="@string/menu_dictionary_add" />
+        android:label="@string/menu_dictionary_edit" />
     <fragment
         android:id="@+id/sogouFragment"
         android:name="com.github.dictionary.SogouFragment"
