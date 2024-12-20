@@ -63,12 +63,12 @@ class LanguageFragment : Fragment() {
                 add(Locale.ROOT) // first
                 val localLocales = buildSet<Locale> {
                     val localLocales = ConfigurationCompat.getLocales(resources.configuration)
+                    add(Locale.SIMPLIFIED_CHINESE) // at least once
                     repeat(localLocales.size()) {
                         localLocales.get(it)?.let { locale ->
                             add(Locale(locale.language, locale.country, "")) // remove variant
                         }
                     }
-                    add(Locale.SIMPLIFIED_CHINESE) // at least once
                 }
                 addAll(localLocales.toList())
             }
