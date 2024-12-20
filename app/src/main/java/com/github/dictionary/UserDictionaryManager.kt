@@ -66,12 +66,15 @@ class UserDictionaryManager(context: Context) {
             if (locale != null) {
                 put(UserDictionary.Words.LOCALE, locale)//def:null
             }
+            if (locale == null || locale == "null" || locale == "") {
+                put(UserDictionary.Words.LOCALE, null as String?)
+            }
             if (appid != null) {
                 put(UserDictionary.Words.APP_ID, appid)//def:0
             }
         }
         if (BuildConfig.DEBUG) {
-            Log.d("insert", "Word: $word, Frequency: $frequency locale:$locale appid:$appid shortcut:$shortcut")
+            Log.d("insert", "Word: $word, Frequency: $frequency locale:$locale ${locale == null} appid:$appid shortcut:$shortcut")
         }
         contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
     }
