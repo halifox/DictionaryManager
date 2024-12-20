@@ -120,7 +120,7 @@ class Sogou : DictionaryImporter.Parser, DictionaryImporter.Downloader, KoinComp
                 val wordCount = file.readUnsignedLittleEndianShort() // 读取词条数量
                 val pinyinCount = file.readUnsignedLittleEndianShort() / 2 // 读取拼音数量
                 val pinyinList = List(pinyinCount) { // 获取拼音列表
-                    pinyinMapping.getOrDefault(file.readUnsignedLittleEndianShort(), "")
+                    pinyinMapping.get(file.readUnsignedLittleEndianShort()).orEmpty()
                 }
                 repeat(wordCount) {
                     val wordLength = file.readUnsignedLittleEndianShort() // 读取词语长度
