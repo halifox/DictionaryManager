@@ -124,7 +124,7 @@ class DictionaryFragment : Fragment() {
     private fun addDictionary() {
         val bundle = Bundle().apply {
             putInt(EditWordFragment.TYPE, EditWordFragment.TYPE_ADD)
-            putString(EditWordFragment.LOCALE, locale.toString())
+            putString(EditWordFragment.LOCALE, locale.toString().ifEmpty { null })
         }
         findNavController().navigate(R.id.edieWordFragment, bundle)
     }
@@ -134,7 +134,7 @@ class DictionaryFragment : Fragment() {
             putInt(EditWordFragment.TYPE, EditWordFragment.TYPE_UPDATE)
             putString(EditWordFragment.WORD, word.word)
             putInt(EditWordFragment.FREQUENCY, word.frequency ?: 0)
-            putString(EditWordFragment.LOCALE, word.locale)
+            putString(EditWordFragment.LOCALE, word.locale?.ifEmpty { null })
             putInt(EditWordFragment.APPID, word.appid ?: 0)
             putString(EditWordFragment.SHORTCUT, word.shortcut)
         }
@@ -238,12 +238,6 @@ class DictionaryFragment : Fragment() {
                         selectionArgs = arrayOf("%${keyword}%", locale.toString()),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
-                }
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "load:: locale:${locale} size:${words.size}")
-                    words.forEach {
-                        Log.d(TAG, "Word:${it}")
-                    }
                 }
                 val prevKey = if (page == 0) null else page - 1
                 val nextKey = if (words.size < pageSize) null else page + 1
