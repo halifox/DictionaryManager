@@ -2,6 +2,7 @@ package com.github.dictionary.importer
 
 import android.accounts.AccountManager
 import android.app.DownloadManager
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -21,11 +22,18 @@ class Sogou : DictionaryImporter.Parser, DictionaryImporter.Downloader, KoinComp
         const val EXTENSION = "scel"
     }
 
+    private val context by inject<Context>()
     private val downloadManager by inject<DownloadManager>()
 
     override fun download(id: Int, name: String) {
-        val request = DownloadManager.Request(Uri.parse("https://pinyin.sogou.com/dict/download_cell.php?id=$id&name=$name"))
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${name}.${EXTENSION}")
+        val uri = Uri.parse("https://pinyin.sogou.com/dict/download_cell.php?id=$id&name=$name")
+        val request = DownloadManager.Request(uri)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${name}.${EXTENSION}")
+        } else {
+            request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, "${name}.${EXTENSION}")
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             request.setNotificationVisibility(AccountManager.VISIBILITY_VISIBLE)
         }
