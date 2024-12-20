@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.UserDictionary
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -237,6 +238,12 @@ class DictionaryFragment : Fragment() {
                         selectionArgs = arrayOf("%${keyword}%", locale.toString()),
                         sortOrder = "${UserDictionary.Words.WORD} LIMIT $pageSize OFFSET $offset"
                     )
+                }
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "load:: locale:${locale} size:${words.size}")
+                    words.forEach {
+                        Log.d(TAG, "Word:${it}")
+                    }
                 }
                 val prevKey = if (page == 0) null else page - 1
                 val nextKey = if (words.size < pageSize) null else page + 1

@@ -46,33 +46,37 @@ class EditWordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val type = requireArguments().getInt(TYPE)
-        val word = requireArguments().getString(WORD)
-        val frequency = requireArguments().getInt(FREQUENCY, 250)
-        val locale = requireArguments().getString(LOCALE)
-        val appid = requireArguments().getInt(APPID, 0)
-        val shortcut = requireArguments().getString(SHORTCUT)
+        val _type = requireArguments().getInt(TYPE)
+        val _word = requireArguments().getString(WORD)
+        val _frequency = requireArguments().getInt(FREQUENCY, 250)
+        val _locale = requireArguments().getString(LOCALE)
+        val _appid = requireArguments().getInt(APPID, 0)
+        val _shortcut = requireArguments().getString(SHORTCUT)
 
-        binding.word.setText(word)
-        binding.frequency.setText(frequency.toString())
-        binding.locale.setText(locale)
-        binding.appid.setText(appid.toString())
-        binding.shortcut.setText(shortcut)
+        binding.word.setText(_word)
+        binding.frequency.setText(_frequency.toString())
+        binding.locale.setText(_locale)
+        binding.appid.setText(_appid.toString())
+        binding.shortcut.setText(_shortcut)
 
-        binding.delete.isVisible = type == TYPE_UPDATE
+        binding.delete.isVisible = _type == TYPE_UPDATE
         binding.delete.setOnClickListener {
-            userDictionaryManager.delete(word = word, shortcut = shortcut, frequency = frequency, locale = locale, appid = appid)
+            userDictionaryManager.delete(word = _word, shortcut = _shortcut, frequency = _frequency, locale = _locale, appid = _appid)
             findNavController().navigateUp()
         }
 
         binding.save.setOnClickListener {
-            val newWord = binding.word.text?.toString()
-            val newShortcut = binding.shortcut.text?.toString()
-            val newFrequency = binding.frequency.text?.toString()?.toIntOrNull()
-            val newLocale = binding.locale.text?.toString()
-            val newAppid = binding.appid.text?.toString()?.toIntOrNull()
+            val word = binding.word.text?.toString()
+            val shortcut = binding.shortcut.text?.toString()
+            val frequency = binding.frequency.text?.toString()?.toIntOrNull()
+            var locale = binding.locale.text?.toString()
+            val appid = binding.appid.text?.toString()?.toIntOrNull()
 
-            if (newWord.isNullOrBlank()) {
+            if (locale.isNullOrEmpty()) {
+                locale = null // 处理local = ""的情况
+            }
+
+            if (word.isNullOrBlank()) {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.dialog_add_error_titile)
                     .setMessage(R.string.dialog_add_word_error_message)
@@ -80,7 +84,7 @@ class EditWordFragment : Fragment() {
                     .show()
                 return@setOnClickListener
             }
-            if (newFrequency == null || newFrequency < 1 || newFrequency > 255) {
+            if (frequency == null || frequency < 1 || frequency > 255) {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.dialog_add_error_titile)
                     .setMessage(R.string.dialog_add_frequency_error_message)
@@ -88,11 +92,26 @@ class EditWordFragment : Fragment() {
                     .show()
                 return@setOnClickListener
             }
-            when (type) {
-                TYPE_ADD -> userDictionaryManager.insert(word = newWord, shortcut = newShortcut, frequency = newFrequency, locale = newLocale, appid = newAppid)
+            when (_type) {
+                TYPE_ADD -> userDictionaryManager.insert(
+                    word = word,
+                    shortcut = shortcut,
+                    frequency = frequency,
+                    locale = locale,
+                    appid = appid,
+                )
+
                 TYPE_UPDATE -> userDictionaryManager.update(
-                    word = word, shortcut = shortcut, frequency = frequency, locale = locale, appid = appid,
-                    newWord = newWord, newShortcut = newShortcut, newFrequency = newFrequency, newLocale = newLocale, newAppid = newAppid,
+                    _word = _word,
+                    _shortcut = _shortcut,
+                    _frequency = _frequency,
+                    _locale = _locale,
+                    _appid = _appid,
+                    word = word,
+                    shortcut = shortcut,
+                    frequency = frequency,
+                    locale = locale,
+                    appid = appid,
                 )
             }
             findNavController().navigateUp()

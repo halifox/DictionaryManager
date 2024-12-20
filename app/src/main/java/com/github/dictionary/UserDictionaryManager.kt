@@ -106,35 +106,35 @@ class UserDictionaryManager(context: Context) {
     }
 
     fun update(
-        word: String? = null,
+        _word: String? = null,
+        _shortcut: String? = null,
+        _frequency: Int? = null,
+        _locale: String? = null,
+        _appid: Int? = null,
+        word: String,
         shortcut: String? = null,
         frequency: Int? = null,
         locale: String? = null,
         appid: Int? = null,
-        newWord: String,
-        newShortcut: String? = null,
-        newFrequency: Int? = null,
-        newLocale: String? = null,
-        newAppid: Int? = null,
     ) {
         val values = ContentValues().apply {
-            put(UserDictionary.Words.WORD, newWord)
-            if (newShortcut != null) {
-                put(UserDictionary.Words.SHORTCUT, newShortcut)//def:null
+            put(UserDictionary.Words.WORD, word)
+            if (shortcut != null) {
+                put(UserDictionary.Words.SHORTCUT, shortcut)//def:null
             }
-            if (newFrequency != null) {
-                put(UserDictionary.Words.FREQUENCY, newFrequency)//def:1
+            if (frequency != null) {
+                put(UserDictionary.Words.FREQUENCY, frequency)//def:1
             }
-            if (newLocale != null) {
-                put(UserDictionary.Words.LOCALE, newLocale)//def:null
+            if (locale != null) {
+                put(UserDictionary.Words.LOCALE, locale)//def:null
             }
-            if (newAppid != null) {
-                put(UserDictionary.Words.APP_ID, newAppid)//def:0
+            if (appid != null) {
+                put(UserDictionary.Words.APP_ID, appid)//def:0
             }
         }
 
 
-        val (selection, selectionArgs) = selection(word, shortcut, frequency, locale, appid)
+        val (selection, selectionArgs) = selection(_word, _shortcut, _frequency, _locale, _appid)
         contentResolver.update(
             UserDictionary.Words.CONTENT_URI,
             values,
