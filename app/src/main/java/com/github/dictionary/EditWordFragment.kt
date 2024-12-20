@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.github.dictionary.databinding.FragmentEditWordBinding
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
@@ -61,7 +60,7 @@ class EditWordFragment : Fragment() {
     private fun fillText() {
         binding.word.setText(_word)
         binding.frequency.setText(_frequency.toString())
-        binding.locale.setText(_locale)
+        binding.locale.setText(_locale.toString())
         binding.appid.setText(_appid.toString())
         binding.shortcut.setText(_shortcut)
     }
@@ -94,10 +93,6 @@ class EditWordFragment : Fragment() {
         var locale = binding.locale.text?.toString()
         val appid = binding.appid.text?.toString()?.toIntOrNull()
 
-        if (locale.isNullOrEmpty()) {
-            locale = null // 处理local = ""的情况
-        }
-
         if (word.isNullOrBlank()) {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.dialog_add_error_titile)
@@ -127,6 +122,7 @@ class EditWordFragment : Fragment() {
                 locale = locale,
                 appid = appid,
             )
+            findNavController().navigateUp()
         }
     }
 
@@ -144,6 +140,7 @@ class EditWordFragment : Fragment() {
                 locale = locale,
                 appid = appid,
             )
+            findNavController().navigateUp()
         }
     }
 
