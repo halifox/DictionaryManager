@@ -26,7 +26,7 @@ class Sogou : DictionaryImporter.Parser, DictionaryImporter.Downloader, KoinComp
     private val downloadManager by inject<DownloadManager>()
 
     override fun download(id: Int, name: String) {
-        val uri = Uri.parse("https://pinyin.sogou.com/dict/download_cell.php?id=$id&name=$name")
+        val uri = Uri.parse("https://pinyin.sogou.com/d/dict/download_cell.php?id=$id&name=$name")
         val request = DownloadManager.Request(uri)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
