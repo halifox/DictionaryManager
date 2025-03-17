@@ -50,5 +50,6 @@
     <string name="td_edit_appid">应用程序 ID</string>
     <string name="td_edit_save">保存</string>
     <string name="td_edit_delete">删除</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>
