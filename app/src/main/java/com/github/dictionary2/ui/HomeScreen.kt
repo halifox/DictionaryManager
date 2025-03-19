@@ -28,7 +28,8 @@ import org.koin.compose.koinInject
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen() {
-    val context: Context = LocalContext.current
+    val context = LocalContext.current
+    val navHostController = LocalNavController.current
     val inputMethodManager: InputMethodManager = koinInject()
     Scaffold(
         topBar = {
@@ -64,7 +65,10 @@ fun HomeScreen() {
 
             Preference(
                 title = stringResource(id = R.string.td_sogou),
-                description = stringResource(id = R.string.td_statement)
+                description = stringResource(id = R.string.td_statement),
+                onClick = {
+                    navHostController.navigate("/dictionary_index_screen")
+                }
             )
 
             Preference(

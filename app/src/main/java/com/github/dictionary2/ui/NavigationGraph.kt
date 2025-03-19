@@ -48,6 +48,9 @@ private fun NavigationGraph() {
         composable("/ime_request_permission") {
             ImeRequestPermissionScreen()
         }
+        composable("/dictionary_index_screen") {
+            DictionaryIndexScreen()
+        }
     }
 }
 

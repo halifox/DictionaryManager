@@ -85,4 +85,6 @@ dependencies {
     implementation("io.insert-koin:koin-android:4.1.0-Beta5")
     implementation("io.insert-koin:koin-androidx-compose:4.1.0-Beta5")
     implementation("io.insert-koin:koin-androidx-compose-navigation:4.1.0-Beta5")
+
+    implementation("androidx.paging:paging-compose:3.3.6")
 }
