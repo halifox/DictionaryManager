@@ -1,7 +1,6 @@
 package com.github.dictionary2.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dictionary.R
@@ -86,7 +86,7 @@ fun HomeScreen() {
 }
 
 
-@Preview(device = "spec:parent=pixel_5")
+@Preview(device = Devices.PIXEL)
 @Composable
 fun ButtonPreference(
     title: String = "title",
@@ -112,7 +112,7 @@ fun ButtonPreference(
     }
 }
 
-@Preview(device = "spec:parent=pixel_5")
+@Preview(device = Devices.PIXEL)
 @Composable
 fun Preference(
     title: String = "title",

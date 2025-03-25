@@ -8,11 +8,13 @@ import androidx.room.RoomDatabase
         SogouIndex::class,
         XunfeiIndex::class,
         BaiduIndex::class,
+        DownloadTask::class,
     ],
-    version = 1,
+    version = 2,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun sogouDao(): SogouDao
     abstract fun xunfeiDao(): XunfeiDao
     abstract fun baiduDao(): BaiduDao
+    abstract fun downloadDao(): DownloadDao
 }

@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-service:2.8.7")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation("androidx.compose.ui:ui")
@@ -87,4 +88,6 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose-navigation:4.1.0-Beta5")
 
     implementation("androidx.paging:paging-compose:3.3.6")
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
