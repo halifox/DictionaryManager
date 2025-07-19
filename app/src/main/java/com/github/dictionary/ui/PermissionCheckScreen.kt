@@ -34,7 +34,6 @@ fun PermissionCheckScreen(navController: NavHostController) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            // 处理生命周期事件，例如：
             when (event) {
                 Lifecycle.Event.ON_START -> {
                     if (checkInputMethodSettingsActive(context)) {
@@ -45,7 +44,6 @@ fun PermissionCheckScreen(navController: NavHostController) {
                         }
                     }
                 }
-
                 else                     -> {}
             }
         }

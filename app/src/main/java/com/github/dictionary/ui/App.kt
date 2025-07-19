@@ -12,8 +12,9 @@ fun App() {
         val navController = rememberNavController()
         NavHost(navController, "splash") {
             composable("splash") { SplashScreen(navController) }
-            composable("home") { HomeScreen(navController) }
             composable("ime_permission") { PermissionCheckScreen(navController) }
+            composable("home") { HomeScreen(navController) }
+            composable("dictionary") { DictionaryScreen(navController) }
         }
     }
 }

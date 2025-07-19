@@ -64,6 +64,10 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.2")
 
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
+    implementation("io.coil-kt.coil3:coil-svg:3.2.0")
 }
 
 room { schemaDirectory("$projectDir/schemas") }
