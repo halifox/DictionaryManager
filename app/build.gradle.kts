@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
     id("androidx.room") version "2.7.2"
+    id("com.google.dagger.hilt.android") version "2.57"
 }
 
 android {
@@ -27,11 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -68,6 +69,17 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.2.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
     implementation("io.coil-kt.coil3:coil-svg:3.2.0")
+
+    implementation("androidx.paging:paging-compose:3.3.6")
+
+    implementation("com.google.dagger:hilt-android:2.57")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    ksp("com.google.dagger:hilt-android-compiler:2.57")
 }
 
-room { schemaDirectory("$projectDir/schemas") }
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+hilt {
+    enableAggregatingTask = false
+}
