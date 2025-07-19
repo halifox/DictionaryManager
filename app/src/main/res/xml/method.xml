@@ -1,0 +1,3 @@
+<input-method xmlns:android="http://schemas.android.com/apk/res/android">
+    <subtype android:name="display_name_german_keyboard_ime" />
+</input-method>
