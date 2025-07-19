@@ -2,16 +2,19 @@ package com.github.dictionary.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.github.dictionary.model.Dict
 
 @Dao
 interface DictDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<Dict>)
+    @Query("SELECT * FROM dict WHERE source = :source AND name LIKE :key ORDER BY id ASC")
+    fun search(source: String, key: String): PagingSource<Int, Dict>
 
-    @Query("SELECT * FROM dict ORDER BY id ASC")
-    fun pagingSource(): PagingSource<Int, Dict>
+    @Query("SELECT * FROM dict WHERE source = :source AND pid = :pid AND tiers = :tiers ORDER BY id ASC")
+    suspend fun getCategories(source: String, pid: String, tiers: Int): List<Dict>
+
+    @RawQuery(observedEntities = [Dict::class])
+    fun getSubTree(query: SupportSQLiteQuery): PagingSource<Int, Dict>
 }

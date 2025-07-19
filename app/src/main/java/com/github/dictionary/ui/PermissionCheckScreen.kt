@@ -57,7 +57,7 @@ fun PermissionCheckScreen(navController: NavHostController) {
         Column(
             Modifier
                 .padding(it)
-                .padding(16.dp)
+                .padding(16.dp,0.dp)
         ) {
             Column(
                 Modifier

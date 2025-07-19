@@ -28,29 +28,29 @@ fun HomeScreen(navController: NavHostController) {
         Column(
             Modifier
                 .padding(it)
-                .padding(16.dp)
+                .padding(16.dp, 0.dp)
         ) {
             ListItem(
                 { Text("搜狗词库") },
-                Modifier.clickable { navController.navigate("dictionary") },
+                Modifier.clickable { navController.navigate("dictionary/sougo") },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.sogou, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("百度词库") },
-                Modifier.clickable { navController.navigate("dictionary") },
+                Modifier.clickable { navController.navigate("dictionary/baidu") },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.baidu, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("QQ词库") },
-                Modifier.clickable { navController.navigate("dictionary") },
+                Modifier.clickable { navController.navigate("dictionary/qq") },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.qq, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("本地词库") },
-                Modifier.clickable { navController.navigate("dictionary") },
+                Modifier.clickable { navController.navigate("dictionary/local") },
                 supportingContent = { Text("本地词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
             )

@@ -1,64 +1,190 @@
 package com.github.dictionary.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopSearchBar
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.github.dictionary.repository.DictRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import com.github.dictionary.model.Dict
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DictionaryScreen(navController: NavHostController) {
+fun DictionaryScreen(navController: NavHostController, source: String) {
     val viewModel = hiltViewModel<DictionaryViewModel>()
-    val items = viewModel.pager.collectAsLazyPagingItems()
-    Scaffold(topBar = {
-        TopAppBar({ Text("搜狗词库") })
-    }) {
+    val textFieldState = rememberTextFieldState()
+    val searchBarState = rememberSearchBarState()
+    val scope = rememberCoroutineScope()
+    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+
+    var currentDict by rememberSaveable { mutableStateOf<Dict?>(null) }
+    val items = viewModel.getSubTreeQuery(currentDict?.id, source).collectAsLazyPagingItems()
+
+    val inputField =
+        @Composable {
+            SearchBarDefaults.InputField(
+                modifier = Modifier,
+                searchBarState = searchBarState,
+                textFieldState = textFieldState,
+                onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
+                placeholder = { Text("Search...") },
+                leadingIcon = {
+                    if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                        IconButton(
+                            onClick = { scope.launch { searchBarState.animateToCollapsed() } }
+                        ) {
+                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    } else {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    }
+                },
+            )
+        }
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopSearchBar(
+                scrollBehavior = scrollBehavior,
+                state = searchBarState,
+                inputField = inputField,
+            )
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {
+                val key = textFieldState.text.toString()
+                val items = viewModel.getSearchPager(source, "%${key}%").collectAsLazyPagingItems()
+                LazyColumn() {
+                    items(items.itemCount) { index ->
+                        DictItem(items[index])
+                    }
+                }
+            }
+        },
+    ) {
         LazyColumn(
             Modifier
                 .padding(it)
-                .padding(16.dp, 0.dp)
         ) {
-            items(items.itemCount) { index ->
-                val dict = items[index]
-                if (dict != null) {
-                    ListItem(
-                        { Text(dict.name.orEmpty()) },
-                        supportingContent = { Text("""
-                            time: ${dict.time}
-                            downCount: ${dict.downCount}
-                            exps: ${dict.exps}
-                        """.trimIndent()) },
-                    )
-                    HorizontalDivider()
+            item {
+                Column {
+                    DictFilterChipGroup(viewModel, source, 1, null) { currentDict = it }
                 }
+            }
+            items(items.itemCount) { index ->
+                DictItem(items[index])
             }
         }
     }
 }
 
-@HiltViewModel
-class DictionaryViewModel @Inject constructor(private val repo: DictRepository) : ViewModel() {
-    val pager = Pager(
-        PagingConfig(pageSize = 20)
+@Composable
+fun DictItem(dict: Dict?) {
+    dict ?: return
+    var isExpand by remember(dict) { mutableStateOf(false) }
+    ListItem(
+        {
+            Text(dict.name.orEmpty())
+        },
+        Modifier.clickable {
+            isExpand = !isExpand
+        },
+        supportingContent = {
+            Text(
+                """
+                        词库示例: ${dict.exps.orEmpty()}
+                        更新时间: ${dict.time.orEmpty()}
+                        下载次数: ${dict.downCount.orEmpty()}
+                    """.trimIndent(),
+                maxLines = if (isExpand) Int.MAX_VALUE else 1
+            )
+        },
+        trailingContent = {
+            Button(
+                {
+
+                },
+            ) {
+                Text("安装")
+            }
+        }
+    )
+    HorizontalDivider()
+
+
+}
+
+@Composable
+fun DictFilterChipGroup(
+    viewModel: DictionaryViewModel,
+    source: String,
+    tiers: Int,
+    parentDict: Dict?,
+    onSelected: (Dict?) -> Unit,
+) {
+    var currentDict by rememberSaveable(parentDict) { mutableStateOf<Dict?>(null) }
+    val dictList by viewModel.getCategories(source, parentDict?.id, tiers).collectAsState(emptyList())
+    if (dictList.isEmpty()) return
+    Row(
+        Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(start = 16.dp),
+        Arrangement.spacedBy(8.dp)
     ) {
-        repo.pagingSource()
-    }.flow.cachedIn(viewModelScope)
+        dictList.forEach { dict ->
+            FilterChip(
+                currentDict == dict,
+                {
+                    if (currentDict == dict) {
+                        currentDict = null
+                        onSelected(parentDict)
+                    } else {
+                        currentDict = dict
+                        onSelected(dict)
+                    }
+                },
+                {
+                    Text(dict.name.orEmpty())
+                }
+            )
+        }
+    }
+    if (currentDict != null) {
+        DictFilterChipGroup(viewModel, source, tiers + 1, currentDict, onSelected)
+    }
 }
