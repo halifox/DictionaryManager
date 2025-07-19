@@ -3,13 +3,14 @@ package com.github.dictionary.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,11 +34,21 @@ fun DictionaryScreen(navController: NavHostController) {
         LazyColumn(
             Modifier
                 .padding(it)
-                .padding(16.dp)
+                .padding(16.dp, 0.dp)
         ) {
             items(items.itemCount) { index ->
-                val item = items[index]
-                Text("Index=$index: $item", fontSize = 20.sp)
+                val dict = items[index]
+                if (dict != null) {
+                    ListItem(
+                        { Text(dict.name.orEmpty()) },
+                        supportingContent = { Text("""
+                            time: ${dict.time}
+                            downCount: ${dict.downCount}
+                            exps: ${dict.exps}
+                        """.trimIndent()) },
+                    )
+                    HorizontalDivider()
+                }
             }
         }
     }
