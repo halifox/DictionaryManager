@@ -10,6 +10,7 @@ import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.dictionary.db.DictDao
 import com.github.dictionary.model.Dict
+import com.github.dictionary.model.LocalRecord
 import com.github.dictionary.parser.BaiduParser
 import com.github.dictionary.parser.IParser
 import com.github.dictionary.parser.ParsedResult
@@ -44,13 +45,6 @@ class DictRepository @Inject constructor(private val context: Context, private v
         }
     }
 
-    fun setInstallState(dict: Dict, installed: Boolean) {
-        sp.edit { putBoolean(dict._id.toString(), installed) }
-    }
-
-    fun isInstalled(dict: Dict): Boolean {
-        return sp.getBoolean(dict._id.toString(), false)
-    }
 
     fun parse(file: File): List<ParsedResult> {
         val parser = getParser(file.extension)
@@ -58,8 +52,8 @@ class DictRepository @Inject constructor(private val context: Context, private v
         return results
     }
 
-    fun install(dict: Dict, data: List<ParsedResult>): Int {
-
+    suspend fun install(dict: Dict, data: List<ParsedResult>): Int {
+        val ids = mutableListOf<Long>()
         data.forEach {
             val values = ContentValues().apply {
                 put(UserDictionary.Words.WORD, it.word)
@@ -71,30 +65,29 @@ class DictRepository @Inject constructor(private val context: Context, private v
             val result = context.contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
             if (result != null) {
                 val id = ContentUris.parseId(result)
-                //todo 记录成功的id
+                ids += id
             }
         }
-        setInstallState(dict, true)
-        return 0
+        dao.insert(LocalRecord(dict._id, ids))
+        return ids.size
     }
 
-    fun uninstall(dict: Dict) {
+    suspend fun uninstall(dict: Dict) {
         context.contentResolver.delete(
             UserDictionary.Words.CONTENT_URI,
             "${UserDictionary.Words.APP_ID} = ?",
             arrayOf(dict._id.toString())
         )
-        setInstallState(dict, false)
+        dao.deleteById(dict._id)
     }
 
-    fun getLocalWorlds(dict: Dict): List<ParsedResult> {
-        Log.d("TAG", "getLocalWorlds: ${dict}")
+    fun getLocalWorlds(ids: List<Long>): List<ParsedResult> {
         val results = mutableListOf<ParsedResult>()
         context.contentResolver.query(
             UserDictionary.Words.CONTENT_URI,
             null,
             "${UserDictionary.Words.APP_ID} = ?",
-            arrayOf(dict._id.toString()),
+            arrayOf(ids.joinToString()),
             null
         )?.use { cursor ->
             val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
@@ -142,7 +135,6 @@ class DictRepository @Inject constructor(private val context: Context, private v
                                )
                 SELECT * FROM deduped WHERE tiers = ? ORDER BY id ASC
     """.trimIndent()
-        Log.d("TAG", "getSubTreeQuery:${listOf(pid, source, tiers)} ")
         val query = SimpleSQLiteQuery(sql, arrayOf(pid, source, tiers))
         return dao.getSubTree(query)
     }
