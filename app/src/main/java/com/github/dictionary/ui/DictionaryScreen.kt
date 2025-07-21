@@ -47,6 +47,7 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.dictionary.model.Dict
+import com.github.dictionary.model.DictSaver
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -99,13 +100,13 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
                 ) {
                     val state = items.loadState.refresh
                     when (state) {
-                        is LoadState.Error      -> item {
+                        is LoadState.Error -> item {
                             Box(Modifier.fillMaxSize(), Alignment.Center) {
                                 Text("${state.error}")
                             }
                         }
 
-                        LoadState.Loading       -> item {
+                        LoadState.Loading -> item {
                             Box(Modifier.fillMaxSize(), Alignment.Center) {
                                 LoadingIndicator()
                             }
@@ -119,7 +120,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
             }
         },
     ) {
-        var currentDict by rememberSaveable { mutableStateOf<Dict?>(null) }
+        var currentDict by rememberSaveable(stateSaver = DictSaver) { mutableStateOf<Dict?>(null) }
         val items = viewModel.getSubTreeQuery(currentDict?.id, source).collectAsLazyPagingItems()
         LazyColumn(
             Modifier
@@ -133,13 +134,13 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
             }
             val state = items.loadState.refresh
             when (state) {
-                is LoadState.Error      -> item {
+                is LoadState.Error -> item {
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
                         Text("${state.error}")
                     }
                 }
 
-                LoadState.Loading       -> item {
+                LoadState.Loading -> item {
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
                         LoadingIndicator()
                     }
@@ -195,7 +196,7 @@ fun DictFilterChipGroup(
     parentDict: Dict?,
     onSelected: (Dict?) -> Unit,
 ) {
-    var currentDict by rememberSaveable(parentDict) { mutableStateOf<Dict?>(null) }
+    var currentDict by rememberSaveable(parentDict, stateSaver = DictSaver) { mutableStateOf<Dict?>(null) }
     val dictList by viewModel.getCategories(source, parentDict?.id, tiers).collectAsState(emptyList())
     if (dictList.isEmpty()) return
     Row(
