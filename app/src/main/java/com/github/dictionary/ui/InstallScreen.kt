@@ -1,14 +1,12 @@
 package com.github.dictionary.ui
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -24,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.dictionary.model.Dict
+import com.github.dictionary.parser.BaiduParser
+import com.github.dictionary.parser.QQParser
+import com.github.dictionary.parser.SougoParser
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +112,7 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             "sougo" -> "https://pinyin.sogou.com/d/dict/download_cell.php?id=${dict.id}&name=${dict.name}"
             "baidu" -> "https://shurufa.baidu.com/dict_innerid_download?innerid=${dict.innerId}"
             "qq" -> "https://cdict.qq.pinyin.cn/v1/download?dict_id=${dict.id}"
-            else -> throw IllegalArgumentException("")
+            else -> throw IllegalArgumentException()
         }
     }
 
@@ -121,7 +121,7 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             "sougo" -> "${dict.id}.scel"
             "baidu" -> "${dict.id}.bdict"
             "qq" -> "${dict.id}.qpyd"
-            else -> throw IllegalArgumentException("")
+            else -> throw IllegalArgumentException()
         }
     }
 
@@ -171,10 +171,19 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             outputStream.close()
         }
         tmpFile.renameTo(file)
-        install(file)
+        install(file, dict)
     }
 
-    fun install(file: File) {
+
+    fun install(file: File, dict: Dict) {
+        val parser = when (file.extension) {
+            "scel"/*sougo*/ -> SougoParser()
+            "bdict"/*baidu*/ -> BaiduParser()
+            "qpyd"/*qq*/ -> QQParser()
+            else -> throw IllegalArgumentException()
+        }
+        val results = parser.parse(file.path)
+
 
     }
 
