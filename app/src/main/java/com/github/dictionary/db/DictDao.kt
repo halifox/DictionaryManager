@@ -13,25 +13,25 @@ import com.github.dictionary.model.LocalRecord
 @Dao
 interface DictDao {
     @Query("SELECT * FROM dict WHERE _id = :id")
-    suspend fun getDict(id: Int): Dict
+    suspend fun getDictionaryById(id: Int): Dict
 
     @Query("SELECT * FROM dict WHERE source = :source AND name LIKE :key AND tiers = :tiers ORDER BY id ASC")
-    fun search(source: String, key: String, tiers: Int): PagingSource<Int, Dict>
+    fun searchDictionaries(source: String, key: String, tiers: Int): PagingSource<Int, Dict>
 
     @Query("SELECT * FROM dict WHERE source = :source AND pid = :pid AND tiers = :tiers ORDER BY id ASC")
-    suspend fun getCategories(source: String, pid: String, tiers: Int): List<Dict>
+    suspend fun getCategoriesByParentId(source: String, pid: String, tiers: Int): List<Dict>
 
     @RawQuery(observedEntities = [Dict::class])
-    fun getSubTree(query: SupportSQLiteQuery): PagingSource<Int, Dict>
+    fun getSubTreeDict(query: SupportSQLiteQuery): PagingSource<Int, Dict>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(record: LocalRecord)
+    suspend fun insertRecord(record: LocalRecord)
 
     @Query("SELECT * FROM record WHERE _id = :id")
-    suspend fun getById(id: Int): LocalRecord?
+    suspend fun getRecordById(id: Int): LocalRecord?
 
     @Query("DELETE FROM record WHERE _id = :id")
-    suspend fun deleteById(id: Int)
+    suspend fun deleteRecordById(id: Int)
 
 }

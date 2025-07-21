@@ -50,111 +50,72 @@ fun InstallScreen(data: Install) {
         viewModel.init(data)
     }
 
-    when (uiState) {
-        is InstallScreenState.Error -> {
-            val uiState = uiState as InstallScreenState.Error
-            return ErrorScreen(uiState.e)
-        }
+    if (uiState is InstallScreenState.Error) {
+        val uiState = uiState as InstallScreenState.Error
+        return ErrorScreen(uiState.exception)
+    }
+    if (uiState == InstallScreenState.Loading) {
+        return LoadingIndicatorScreen()
+    }
 
-        InstallScreenState.Loading -> {
-            return LoadingIndicatorScreen()
-        }
+    val (dict, localRecord) = uiState as InstallScreenState.Installed
+    val progress by viewModel.progress.collectAsState()
+    val results by viewModel.results.collectAsState()
+    Scaffold(
+        topBar = { TopAppBar({ Text(dict.name.orEmpty()) }) }
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(it)
 
-        is InstallScreenState.Installed -> {
-            val (dict, localRecord) = uiState as InstallScreenState.Installed
-            val results = viewModel.repo.getLocalWorlds(localRecord)
-            return Scaffold(
-                topBar = {
-                    TopAppBar(
-                        {
-                            Text(dict.name.orEmpty())
-                        })
-                }
+        ) {
+            if (results.isEmpty()) {
+                LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
+            }
+            LazyColumn(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                Column(
+                items(results) {
+                    ListItem(
+                        { Text(it.word) },
+                        supportingContent = { Text(it.pinyin) }
+                    )
+                    HorizontalDivider()
+                }
+            }
+            if (localRecord == null) {
+                Button(
+                    { viewModel.install(dict, results) },
                     Modifier
-                        .fillMaxSize()
-                        .padding(it)
+                        .fillMaxWidth()
+                        .padding(16.dp, 0.dp),
+                    enabled = results.isNotEmpty()
                 ) {
-                    LazyColumn(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        items(results) {
-                            ListItem(
-                                { Text("${it.word}") },
-                                supportingContent = { Text("${it.pinyin}") }
-                            )
-                            HorizontalDivider()
-                        }
-                    }
-                    Button(
-                        { viewModel.uninstall(localRecord) },
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp, 0.dp)
-                    ) {
-                        Text("删除")
-                    }
+                    Text("安装")
+                }
+            } else {
+                Button(
+                    { viewModel.uninstall(localRecord) },
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp, 0.dp),
+                    enabled = results.isNotEmpty()
+                ) {
+                    Text("删除")
                 }
             }
 
-        }
-
-        is InstallScreenState.UnInstalled -> {
-            val (dict) = uiState as InstallScreenState.UnInstalled
-            val progress by viewModel.progress.collectAsState()
-            val results by viewModel.results.collectAsState()
-            LaunchedEffect(dict) {
-                viewModel.download(dict)
-            }
-
-            return Scaffold(
-                topBar = { TopAppBar({ Text(dict.name.orEmpty()) }) }
-            ) {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(it)
-
-                ) {
-                    if (results.isEmpty()) {
-                        LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
-                    }
-                    LazyColumn(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        items(results) {
-                            ListItem(
-                                { Text("${it.word}") },
-                                supportingContent = { Text("${it.pinyin}") }
-                            )
-                            HorizontalDivider()
-                        }
-                    }
-                    Button(
-                        { viewModel.install(dict, results) },
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp, 0.dp),
-                        enabled = results.isNotEmpty()
-                    ) {
-                        Text("安装")
-                    }
-                }
-            }
         }
     }
 }
 
 sealed class InstallScreenState {
     object Loading : InstallScreenState()
-    data class Error(val e: Exception) : InstallScreenState()
-    data class Installed(val dict: Dict, val localRecord: LocalRecord) : InstallScreenState()
-    data class UnInstalled(val dict: Dict) : InstallScreenState()
+    data class Error(val exception: Exception) : InstallScreenState()
+    data class Installed(val dict: Dict, val localRecord: LocalRecord?) : InstallScreenState()
 }
 
 
@@ -171,12 +132,13 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
     fun init(data: Install) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dict = repo.getDict(data.id)
-                val localRecord = repo.getById(dict._id)
-                if (localRecord != null) {
-                    _uiState.value = InstallScreenState.Installed(dict, localRecord)
+                val dict = repo.getDictionaryById(data.id)
+                val localRecord = repo.getRecordById(dict._id)
+                _uiState.value = InstallScreenState.Installed(dict, localRecord)
+                if (localRecord == null) {
+                    download(dict)
                 } else {
-                    _uiState.value = InstallScreenState.UnInstalled(dict)
+                    results.value = repo.queryUserDictionaryByIds(localRecord)
                 }
             } catch (e: Exception) {
                 _uiState.value = InstallScreenState.Error(e)
@@ -188,11 +150,11 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
 
     fun download(dict: Dict) {
         viewModelScope.launch(Dispatchers.IO) {
-            val url = repo.getDownloadUrl(dict)
-            val fn = repo.getFileName(dict)
+            val url = repo.getUserDictionaryDownloadUrl(dict)
+            val fn = repo.getUserDictionaryFileName(dict)
             val file = File(context.cacheDir, fn)
             if (file.exists()) {
-                results.value = repo.parse(file)
+                results.value = repo.parseUserDictionaryFile(file)
                 return@launch
             }
             val request = Request.Builder()
@@ -230,20 +192,20 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
                 outputStream.close()
             }
             tmpFile.renameTo(file)
-            results.value = repo.parse(file)
+            results.value = repo.parseUserDictionaryFile(file)
         }
     }
 
 
     fun install(dict: Dict, data: List<ParsedResult>) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.install(dict, data)
+            repo.installUserDictionary(dict, data)
         }
     }
 
     fun uninstall(record: LocalRecord) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.uninstall(record)
+            repo.uninstallUserDictionary(record)
         }
     }
 

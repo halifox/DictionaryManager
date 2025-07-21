@@ -4,7 +4,6 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.provider.UserDictionary
-import android.util.Log
 import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.dictionary.db.DictDao
@@ -23,62 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DictRepository @Inject constructor(private val context: Context, private val dao: DictDao) : DictDao by dao {
-    fun parse(file: File): List<ParsedResult> {
-        val parser = getParser(file.extension)
-        val results = parser.parse(file.absolutePath)
-        return results
-    }
 
-    suspend fun install(dict: Dict, data: List<ParsedResult>): Int {
-        val ids = mutableListOf<Long>()
-        data.forEach {
-            val values = ContentValues().apply {
-                put(UserDictionary.Words.WORD, it.word)
-                put(UserDictionary.Words.SHORTCUT, it.pinyin)
-                put(UserDictionary.Words.FREQUENCY, it.wordFrequency.toInt())
-                put(UserDictionary.Words.LOCALE, Locale.SIMPLIFIED_CHINESE.toString())
-                put(UserDictionary.Words.APP_ID, dict._id)
-            }
-            val result = context.contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
-            if (result != null) {
-                val id = ContentUris.parseId(result)
-                ids += id
-            }
-        }
-        dao.insert(LocalRecord(dict._id, ids))
-        return ids.size
-    }
-
-    suspend fun uninstall(record: LocalRecord) {
-        context.contentResolver.delete(
-            UserDictionary.Words.CONTENT_URI,
-            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
-            record.ids.map { it.toString() }.toTypedArray(),
-        )
-        dao.deleteById(record._id)
-    }
-
-    fun getLocalWorlds(record: LocalRecord): List<ParsedResult> {
-        val results = mutableListOf<ParsedResult>()
-        context.contentResolver.query(
-            UserDictionary.Words.CONTENT_URI,
-            null,
-            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
-            record.ids.map { it.toString() }.toTypedArray(),
-            null
-        )?.use { cursor ->
-            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
-            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
-            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
-            while (cursor.moveToNext()) {
-                val word = cursor.getString(wordIndex)
-                val shortcut = cursor.getString(shortcutIndex)
-                val frequency = cursor.getInt(freqIndex)
-                results.add(ParsedResult(word, shortcut, frequency.toFloat()))
-            }
-        }
-        return results
-    }
 
     fun getSubTreeQuery(pid: String, source: String, tiers: Int): PagingSource<Int, Dict> {
         /**
@@ -112,19 +56,11 @@ class DictRepository @Inject constructor(private val context: Context, private v
                 SELECT * FROM deduped WHERE tiers = ? ORDER BY id ASC
     """.trimIndent()
         val query = SimpleSQLiteQuery(sql, arrayOf(pid, source, tiers))
-        return dao.getSubTree(query)
+        return dao.getSubTreeDict(query)
     }
 
-    fun getParser(extension: String): IParser {
-        return when (extension) {
-            "scel"/*sougo*/ -> SougoParser()
-            "bdict"/*baidu*/ -> BaiduParser()
-            "qpyd"/*qq*/ -> QQParser()
-            else -> throw IllegalArgumentException()
-        }
-    }
 
-    fun getDownloadUrl(dict: Dict): String {
+    fun getUserDictionaryDownloadUrl(dict: Dict): String {
         return when (dict.source) {
             "sougo" -> "https://pinyin.sogou.com/d/dict/download_cell.php?id=${dict.id}&name=${dict.name}"
             "baidu" -> "https://shurufa.baidu.com/dict_innerid_download?innerid=${dict.innerId}"
@@ -133,7 +69,7 @@ class DictRepository @Inject constructor(private val context: Context, private v
         }
     }
 
-    fun getFileName(dict: Dict): String {
+    fun getUserDictionaryFileName(dict: Dict): String {
         return when (dict.source) {
             "sougo" -> "${dict.id}.scel"
             "baidu" -> "${dict.id}.bdict"
@@ -142,7 +78,7 @@ class DictRepository @Inject constructor(private val context: Context, private v
         }
     }
 
-    fun getMaxTiers(source: String): Int {
+    fun getUserDictionaryMaxTiers(source: String): Int {
         return when (source) {
             "sougo" -> 4
             "baidu" -> 3
@@ -151,5 +87,69 @@ class DictRepository @Inject constructor(private val context: Context, private v
         }
     }
 
+    fun getUserDictionaryParser(extension: String): IParser {
+        return when (extension) {
+            "scel"/*sougo*/ -> SougoParser()
+            "bdict"/*baidu*/ -> BaiduParser()
+            "qpyd"/*qq*/ -> QQParser()
+            else -> throw IllegalArgumentException()
+        }
+    }
 
+    fun parseUserDictionaryFile(file: File): List<ParsedResult> {
+        val parser = getUserDictionaryParser(file.extension)
+        val results = parser.parse(file.absolutePath)
+        return results
+    }
+
+    suspend fun installUserDictionary(dict: Dict, data: List<ParsedResult>): Int {
+        val ids = mutableListOf<Long>()
+        data.forEach {
+            val values = ContentValues().apply {
+                put(UserDictionary.Words.WORD, it.word)
+                put(UserDictionary.Words.SHORTCUT, it.pinyin)
+                put(UserDictionary.Words.FREQUENCY, it.wordFrequency.toInt())
+                put(UserDictionary.Words.LOCALE, Locale.SIMPLIFIED_CHINESE.toString())
+                put(UserDictionary.Words.APP_ID, dict._id)
+            }
+            val result = context.contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
+            if (result != null) {
+                val id = ContentUris.parseId(result)
+                ids += id
+            }
+        }
+        dao.insertRecord(LocalRecord(dict._id, ids))
+        return ids.size
+    }
+
+    suspend fun uninstallUserDictionary(record: LocalRecord) {
+        context.contentResolver.delete(
+            UserDictionary.Words.CONTENT_URI,
+            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
+            record.ids.map { it.toString() }.toTypedArray(),
+        )
+        dao.deleteRecordById(record._id)
+    }
+
+    suspend fun queryUserDictionaryByIds(record: LocalRecord): List<ParsedResult> {
+        val results = mutableListOf<ParsedResult>()
+        context.contentResolver.query(
+            UserDictionary.Words.CONTENT_URI,
+            null,
+            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
+            record.ids.map { it.toString() }.toTypedArray(),
+            null
+        )?.use { cursor ->
+            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
+            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
+            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
+            while (cursor.moveToNext()) {
+                val word = cursor.getString(wordIndex)
+                val shortcut = cursor.getString(shortcutIndex)
+                val frequency = cursor.getInt(freqIndex)
+                results.add(ParsedResult(word, shortcut, frequency.toFloat()))
+            }
+        }
+        return results
+    }
 }
