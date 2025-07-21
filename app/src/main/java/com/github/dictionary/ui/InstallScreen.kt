@@ -98,7 +98,7 @@ fun InstallScreen(data: Install) {
                 }
             } else {
                 Button(
-                    { viewModel.uninstall(localRecord) },
+                    { viewModel.uninstall(dict, localRecord) },
                     Modifier
                         .fillMaxWidth()
                         .padding(16.dp, 0.dp),
@@ -200,12 +200,16 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
     fun install(dict: Dict, data: List<ParsedResult>) {
         viewModelScope.launch(Dispatchers.IO) {
             repo.installUserDictionary(dict, data)
+            val localRecord = repo.getRecordById(dict._id)
+            _uiState.value = InstallScreenState.Installed(dict, localRecord)
         }
     }
 
-    fun uninstall(record: LocalRecord) {
+    fun uninstall(dict: Dict, record: LocalRecord) {
         viewModelScope.launch(Dispatchers.IO) {
             repo.uninstallUserDictionary(record)
+            val localRecord = repo.getRecordById(dict._id)
+            _uiState.value = InstallScreenState.Installed(dict, localRecord)
         }
     }
 
