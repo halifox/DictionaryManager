@@ -14,6 +14,8 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -163,7 +166,7 @@ fun DictItem(navController: NavHostController, dict: Dict?) {
             Text(dict.name.orEmpty())
         },
         Modifier.clickable {
-            isExpand = !isExpand
+            navController.navigate(Install(dict._id))
         },
         supportingContent = {
             Text(
@@ -172,16 +175,18 @@ fun DictItem(navController: NavHostController, dict: Dict?) {
                         更新时间: ${dict.time.orEmpty()}
                         下载次数: ${dict.downCount.orEmpty()}
                     """.trimIndent(),
-                maxLines = if (isExpand) Int.MAX_VALUE else 1
+                maxLines = if (isExpand) Int.MAX_VALUE else 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         trailingContent = {
-            Button(
-                {
-                    navController.navigate(Install(dict._id))
-                },
-            ) {
-                Text("安装")
+            IconButton({
+                isExpand = !isExpand
+            }) {
+                Icon(
+                    if (isExpand) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                    null
+                )
             }
         }
     )
