@@ -31,6 +31,7 @@ import com.github.dictionary.parser.ParsedResult
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -59,6 +60,7 @@ fun InstallScreen(data: Install) {
     }
 
     val (dict, localRecord) = uiState as InstallScreenState.Installed
+    val isBusy by viewModel.isBusy.collectAsState()
     val progress by viewModel.progress.collectAsState()
     val results by viewModel.results.collectAsState()
     Scaffold(
@@ -86,23 +88,31 @@ fun InstallScreen(data: Install) {
                     HorizontalDivider()
                 }
             }
-            if (localRecord == null) {
+            if (isBusy) {
                 Button(
-                    { viewModel.install(dict, results) },
+                    { },
                     Modifier
                         .fillMaxWidth()
                         .padding(16.dp, 0.dp),
-                    enabled = results.isNotEmpty()
+                    enabled = false
+                ) {
+                    Text("处理中")
+                }
+            } else if (localRecord == null) {
+                Button(
+                    { viewModel.installUserDictionary(dict, results) },
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp, 0.dp),
                 ) {
                     Text("安装")
                 }
             } else {
                 Button(
-                    { viewModel.uninstall(dict, localRecord) },
+                    { viewModel.uninstallUserDictionary(dict, localRecord) },
                     Modifier
                         .fillMaxWidth()
                         .padding(16.dp, 0.dp),
-                    enabled = results.isNotEmpty()
                 ) {
                     Text("删除")
                 }
@@ -128,88 +138,94 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
     val client = OkHttpClient.Builder().build()
     val progress = MutableStateFlow(0f)
     val results = MutableStateFlow(emptyList<ParsedResult>())
+    val isBusy = MutableStateFlow(false)
 
     fun init(data: Install) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                isBusy.value = true
                 val dict = repo.getDictionaryById(data.id)
                 val localRecord = repo.getRecordById(dict._id)
                 _uiState.value = InstallScreenState.Installed(dict, localRecord)
                 if (localRecord == null) {
-                    download(dict)
+                    downloadUserDictionary(dict)
                 } else {
                     results.value = repo.queryUserDictionaryByIds(localRecord)
                 }
             } catch (e: Exception) {
                 _uiState.value = InstallScreenState.Error(e)
                 e.printStackTrace()
-            }
-        }
-    }
-
-
-    fun download(dict: Dict) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val url = repo.getUserDictionaryDownloadUrl(dict)
-            val fn = repo.getUserDictionaryFileName(dict)
-            val file = File(context.cacheDir, fn)
-            if (file.exists()) {
-                results.value = repo.parseUserDictionaryFile(file)
-                return@launch
-            }
-            val request = Request.Builder()
-                .get()
-                .url(url)
-                .build()
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                throw IllegalArgumentException("服务器响应异常")
-            }
-            if (!response.promisesBody()) {
-                throw IllegalArgumentException("服务器响应异常")
-            }
-            val body = response.body ?: return@launch
-            val contentLength = body.contentLength()
-
-            val inputStream = body.byteStream()
-            val tmpFile = File(context.cacheDir, "${fn}.tmp")
-            val outputStream = FileOutputStream(tmpFile)
-
-            try {
-                var bytesCopied: Long = 0
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                while (true) {
-                    val bytes = inputStream.read(buffer)
-                    if (bytes == -1) break
-                    outputStream.write(buffer, 0, bytes)
-                    bytesCopied += bytes
-                    progress.value = bytesCopied * 1f / contentLength
-                }
-            } catch (e: Exception) {
-                throw e
             } finally {
-                inputStream.close()
-                outputStream.close()
+                isBusy.value = false
             }
-            tmpFile.renameTo(file)
-            results.value = repo.parseUserDictionaryFile(file)
         }
     }
 
 
-    fun install(dict: Dict, data: List<ParsedResult>) {
+    suspend fun downloadUserDictionary(dict: Dict) {
+        val url = repo.getUserDictionaryDownloadUrl(dict)
+        val fn = repo.getUserDictionaryFileName(dict)
+        val file = File(context.cacheDir, fn)
+        if (file.exists()) {
+            results.value = repo.parseUserDictionaryFile(file)
+            return
+        }
+        val request = Request.Builder()
+            .get()
+            .url(url)
+            .build()
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw IllegalArgumentException("服务器响应异常")
+        }
+        if (!response.promisesBody()) {
+            throw IllegalArgumentException("服务器响应异常")
+        }
+        val body = response.body ?: return
+        val contentLength = body.contentLength()
+
+        val inputStream = body.byteStream()
+        val tmpFile = File(context.cacheDir, "${fn}.tmp")
+        val outputStream = FileOutputStream(tmpFile)
+
+        try {
+            var bytesCopied: Long = 0
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                val bytes = inputStream.read(buffer)
+                if (bytes == -1) break
+                outputStream.write(buffer, 0, bytes)
+                bytesCopied += bytes
+                progress.value = bytesCopied * 1f / contentLength
+            }
+        } catch (e: Exception) {
+            throw e
+        } finally {
+            inputStream.close()
+            outputStream.close()
+        }
+        tmpFile.renameTo(file)
+        results.value = repo.parseUserDictionaryFile(file)
+    }
+
+
+    fun installUserDictionary(dict: Dict, data: List<ParsedResult>) {
         viewModelScope.launch(Dispatchers.IO) {
+            isBusy.value = true
             repo.installUserDictionary(dict, data)
             val localRecord = repo.getRecordById(dict._id)
             _uiState.value = InstallScreenState.Installed(dict, localRecord)
+            isBusy.value = false
         }
     }
 
-    fun uninstall(dict: Dict, record: LocalRecord) {
+    fun uninstallUserDictionary(dict: Dict, record: LocalRecord) {
         viewModelScope.launch(Dispatchers.IO) {
+            isBusy.value = true
             repo.uninstallUserDictionary(record)
             val localRecord = repo.getRecordById(dict._id)
             _uiState.value = InstallScreenState.Installed(dict, localRecord)
+            isBusy.value = false
         }
     }
 
