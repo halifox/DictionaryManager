@@ -2,6 +2,7 @@ package com.github.dictionary.ui
 
 import android.content.Intent
 import android.provider.Settings
+import android.provider.UserDictionary
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -59,6 +60,14 @@ fun HomeScreen(navController: NavHostController) {
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
 
+                },
+                supportingContent = { Text("本地词库的管理") },
+                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
+            )
+            ListItem(
+                { Text("清空本地词库(DEBUG)") },
+                Modifier.clickable {
+                    context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
                 },
                 supportingContent = { Text("本地词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },

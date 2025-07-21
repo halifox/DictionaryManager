@@ -1,10 +1,10 @@
 package com.github.dictionary.repository
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.provider.UserDictionary
 import android.util.Log
-import android.widget.Toast
 import androidx.core.content.edit
 import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
@@ -12,6 +12,7 @@ import com.github.dictionary.db.DictDao
 import com.github.dictionary.model.Dict
 import com.github.dictionary.parser.BaiduParser
 import com.github.dictionary.parser.IParser
+import com.github.dictionary.parser.ParsedResult
 import com.github.dictionary.parser.QQParser
 import com.github.dictionary.parser.SougoParser
 import org.intellij.lang.annotations.Language
@@ -24,37 +25,90 @@ import javax.inject.Singleton
 class DictRepository @Inject constructor(private val context: Context, private val dao: DictDao) : DictDao by dao {
     private val sp = context.getSharedPreferences("dict_state", Context.MODE_PRIVATE)
 
-    fun setInstalled(dict: Dict) {
-        sp.edit {
-            putBoolean(dict._id.toString(), true)
+    init {
+        //debug
+        context.contentResolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null)?.use { cursor ->
+            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
+            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
+            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
+            val appIdIndex = cursor.getColumnIndex(UserDictionary.Words.APP_ID)
+            val idIndex = cursor.getColumnIndex(UserDictionary.Words._ID)
+            while (cursor.moveToNext()) {
+                val word = cursor.getString(wordIndex)
+                val shortcut = cursor.getString(shortcutIndex)
+                val frequency = cursor.getInt(freqIndex)
+                val appid = cursor.getInt(appIdIndex)
+                val id = cursor.getInt(idIndex)
+                Log.d("TAG", "z:${id} ${appid} ${word} ${shortcut} ${frequency} ")
+            }
         }
+    }
+
+    fun setInstallState(dict: Dict, installed: Boolean) {
+        sp.edit { putBoolean(dict._id.toString(), installed) }
     }
 
     fun isInstalled(dict: Dict): Boolean {
         return sp.getBoolean(dict._id.toString(), false)
     }
 
-
-    fun install(file: File, dict: Dict) {
+    fun parse(file: File): List<ParsedResult> {
         val parser = getParser(file.extension)
         val results = parser.parse(file.absolutePath)
-        val values = results.map {
-            ContentValues().apply {
+        return results
+    }
+
+    fun install(dict: Dict, data: List<ParsedResult>): Int {
+
+        data.forEach {
+            val values = ContentValues().apply {
                 put(UserDictionary.Words.WORD, it.word)
                 put(UserDictionary.Words.SHORTCUT, it.pinyin)
                 put(UserDictionary.Words.FREQUENCY, it.wordFrequency.toInt())
                 put(UserDictionary.Words.LOCALE, Locale.SIMPLIFIED_CHINESE.toString())
-                put(UserDictionary.Words.APP_ID, dict.id)
+                put(UserDictionary.Words.APP_ID, dict._id)
             }
-        }.toTypedArray()
-        val size = context.contentResolver.bulkInsert(UserDictionary.Words.CONTENT_URI, values)
-        Toast.makeText(context, "${size}/${results.size}", Toast.LENGTH_SHORT).show()
-        file.delete()
-        setInstalled(dict)
+            val result = context.contentResolver.insert(UserDictionary.Words.CONTENT_URI, values)
+            if (result != null) {
+                val id = ContentUris.parseId(result)
+                //todo 记录成功的id
+            }
+        }
+        setInstallState(dict, true)
+        return 0
     }
 
-    fun delete(dict: Dict) {
-        context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
+    fun uninstall(dict: Dict) {
+        context.contentResolver.delete(
+            UserDictionary.Words.CONTENT_URI,
+            "${UserDictionary.Words.APP_ID} = ?",
+            arrayOf(dict._id.toString())
+        )
+        setInstallState(dict, false)
+    }
+
+    fun getLocalWorlds(dict: Dict): List<ParsedResult> {
+        Log.d("TAG", "getLocalWorlds: ${dict}")
+        val results = mutableListOf<ParsedResult>()
+        context.contentResolver.query(
+            UserDictionary.Words.CONTENT_URI,
+            null,
+            "${UserDictionary.Words.APP_ID} = ?",
+            arrayOf(dict._id.toString()),
+            null
+        )?.use { cursor ->
+            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
+            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
+            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
+            while (cursor.moveToNext()) {
+                val word = cursor.getString(wordIndex)
+                val shortcut = cursor.getString(shortcutIndex)
+                val frequency = cursor.getInt(freqIndex)
+                Log.d("TAG", "getLocalWorlds: ${ParsedResult(word, shortcut, frequency.toFloat())}")
+                results.add(ParsedResult(word, shortcut, frequency.toFloat()))
+            }
+        }
+        return results
     }
 
     fun getSubTreeQuery(pid: String, source: String, tiers: Int): PagingSource<Int, Dict> {

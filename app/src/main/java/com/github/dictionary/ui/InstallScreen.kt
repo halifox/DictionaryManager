@@ -1,12 +1,18 @@
 package com.github.dictionary.ui
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
@@ -49,10 +56,41 @@ fun InstallScreen(data: Install) {
     }
 
 
-
     val dict = (uiState as UiState.Success).data
+    val isInstall = viewModel.repo.isInstalled(dict)
+    if (isInstall) {
+        val results = viewModel.repo.getLocalWorlds(dict)
+        return Scaffold {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                LazyColumn(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    items(results) {
+                        ListItem(
+                            {
+                                Text("${it.word}")
+                            },
+                            supportingContent = {
+                                Text("${it.pinyin}")
+                            }
+                        )
+                    }
+                }
+                Button({
+                    viewModel.repo.uninstall(dict)
+                }, Modifier.fillMaxWidth()) {
+                    Text("删除")
+                }
+            }
+        }
+    }
     val progress by viewModel.progress.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,13 +114,14 @@ sealed class UiState<out T> {
 
 
 @HiltViewModel
-class InstallViewModel @Inject constructor(private val repo: DictRepository, application: Application) : AndroidViewModel(application) {
+class InstallViewModel @Inject constructor(val repo: DictRepository, application: Application) : AndroidViewModel(application) {
     val context = application
     private val _uiState = MutableStateFlow<UiState<Dict>>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
 
     val client = OkHttpClient.Builder().build()
     val progress = MutableStateFlow(0f)
+
 
     fun init(data: Install) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -140,7 +179,11 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             outputStream.close()
         }
         tmpFile.renameTo(file)
-        repo.install(file, dict)
+        val results = repo.parse(file)
+        val size = repo.install(dict, results)
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "${size}/${results.size}", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
