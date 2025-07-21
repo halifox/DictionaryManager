@@ -19,16 +19,17 @@ data class Dict(
     val downCount: String?,
     val exps: String?,
     val tiers: String?,
-)
-
-
-val DictSaver = Saver<Dict?, String>(
-    save = {
-        it ?: return@Saver null
-        Json.encodeToString(it)
-    },
-    restore = {
-        it ?: return@Saver null
-        Json.decodeFromString<Dict>(it)
+) {
+    companion object {
+        val Saver = Saver<Dict?, String>(
+            save = {
+                it ?: return@Saver null
+                Json.encodeToString(it)
+            },
+            restore = {
+                it ?: return@Saver null
+                Json.decodeFromString<Dict>(it)
+            }
+        )
     }
-)
+}

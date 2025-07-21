@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -46,6 +47,8 @@ import javax.inject.Inject
 @Composable
 fun InstallScreen(data: Install) {
     val viewModel = hiltViewModel<InstallViewModel>()
+    val listState = rememberLazyListState()
+
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.init(data)
@@ -78,7 +81,8 @@ fun InstallScreen(data: Install) {
             LazyColumn(
                 Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
+                listState
             ) {
                 items(results) {
                     ListItem(

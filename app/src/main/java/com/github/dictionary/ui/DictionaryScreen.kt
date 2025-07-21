@@ -1,5 +1,6 @@
 package com.github.dictionary.ui
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -50,13 +53,12 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.dictionary.model.Dict
-import com.github.dictionary.model.DictSaver
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
-    val source = data.source
+    val (source) = data
     val viewModel = hiltViewModel<DictionaryViewModel>()
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -123,7 +125,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
             }
         },
     ) {
-        var currentDict by rememberSaveable(stateSaver = DictSaver) { mutableStateOf<Dict?>(null) }
+        var currentDict by rememberSaveable(stateSaver = Dict.Saver) { mutableStateOf<Dict?>(null) }
         val items = viewModel.getSubTreeQuery(currentDict?.id, source).collectAsLazyPagingItems()
         LazyColumn(
             Modifier
@@ -201,7 +203,7 @@ fun DictFilterChipGroup(
     parentDict: Dict?,
     onSelected: (Dict?) -> Unit,
 ) {
-    var currentDict by rememberSaveable(parentDict, stateSaver = DictSaver) { mutableStateOf<Dict?>(null) }
+    var currentDict by rememberSaveable(parentDict, stateSaver = Dict.Saver) { mutableStateOf<Dict?>(null) }
     val dictList by viewModel.getCategories(source, parentDict?.id, tiers).collectAsState(emptyList())
     if (dictList.isEmpty()) return
     Row(

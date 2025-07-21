@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ErrorScreen(e: Exception) {
+fun ErrorScreen(e: Throwable) {
     Scaffold(topBar = {
         TopAppBar({
             Text("Exception")
