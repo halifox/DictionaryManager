@@ -1,6 +1,8 @@
 package com.github.dictionary.ui
 
 import android.app.Application
+import android.content.ContentValues
+import android.provider.UserDictionary
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +41,7 @@ import okhttp3.Request
 import okhttp3.internal.http.promisesBody
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Locale
 import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -52,7 +55,7 @@ fun InstallScreen(data: Install) {
 
     if (uiState is UiState.Error) {
         Box(Modifier.fillMaxSize(), Alignment.Center) {
-            Text("${(uiState as UiState.Error).message}")
+            Text((uiState as UiState.Error).e.stackTraceToString())
         }
         return
     } else if (uiState == UiState.Loading) {
@@ -81,7 +84,7 @@ fun InstallScreen(data: Install) {
 sealed class UiState<out T> {
     object Loading : UiState<Nothing>()
     data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
+    data class Error(val e: Exception) : UiState<Nothing>()
 }
 
 
@@ -101,7 +104,8 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
                 _uiState.value = UiState.Success(dict)
                 download(dict)
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+                _uiState.value = UiState.Error(e)
+                e.printStackTrace()
             }
         }
     }
@@ -157,7 +161,6 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             var bytesCopied: Long = 0
             val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
             while (true) {
-                delay(1000)
                 val bytes = inputStream.read(buffer)
                 if (bytes == -1) break
                 outputStream.write(buffer, 0, bytes)
@@ -182,9 +185,17 @@ class InstallViewModel @Inject constructor(private val repo: DictRepository, app
             "qpyd"/*qq*/ -> QQParser()
             else -> throw IllegalArgumentException()
         }
-        val results = parser.parse(file.path)
-
-
+        val results = parser.parse(file.absolutePath)
+        val values = results.map {
+            ContentValues().apply {
+                put(UserDictionary.Words.WORD, it.word)
+                put(UserDictionary.Words.SHORTCUT, it.pinyin)
+                put(UserDictionary.Words.FREQUENCY, it.wordFrequency.toInt())
+                put(UserDictionary.Words.LOCALE, Locale.SIMPLIFIED_CHINESE.toString())
+                put(UserDictionary.Words.APP_ID, dict.id)
+            }
+        }.toTypedArray()
+        context.contentResolver.bulkInsert(UserDictionary.Words.CONTENT_URI, values)
     }
 
     companion object {

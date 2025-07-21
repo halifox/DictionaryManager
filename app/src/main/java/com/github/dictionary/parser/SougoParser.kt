@@ -21,7 +21,7 @@ class SougoParser : IParser {
         val data = mutableListOf<ParsedResult>()
 
         // 读取 scel 文件
-        val scelFile = File("魔道祖师【官方推荐】.scel")
+        val scelFile = File(path)
         // 读取文件字节，构建小端字节缓冲区
         val buffer = ByteBuffer.wrap(scelFile.readBytes()).order(ByteOrder.LITTLE_ENDIAN)
 
