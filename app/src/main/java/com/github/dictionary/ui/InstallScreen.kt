@@ -1,7 +1,6 @@
 package com.github.dictionary.ui
 
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +34,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
@@ -64,7 +62,7 @@ fun InstallScreen(data: Install) {
 
         is InstallScreenState.Installed -> {
             val (dict, localRecord) = uiState as InstallScreenState.Installed
-            val results = viewModel.repo.getLocalWorlds(localRecord.ids)
+            val results = viewModel.repo.getLocalWorlds(localRecord)
             return Scaffold(
                 topBar = {
                     TopAppBar(
@@ -92,7 +90,7 @@ fun InstallScreen(data: Install) {
                         }
                     }
                     Button(
-                        { viewModel.uninstall(dict) },
+                        { viewModel.uninstall(localRecord) },
                         Modifier
                             .fillMaxWidth()
                             .padding(16.dp, 0.dp)
@@ -243,9 +241,9 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
         }
     }
 
-    fun uninstall(dict: Dict) {
+    fun uninstall(record: LocalRecord) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.uninstall(dict)
+            repo.uninstall(record)
         }
     }
 

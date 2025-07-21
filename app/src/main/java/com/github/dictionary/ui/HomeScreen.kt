@@ -3,6 +3,7 @@ package com.github.dictionary.ui
 import android.content.Intent
 import android.provider.Settings
 import android.provider.UserDictionary
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -69,7 +70,27 @@ fun HomeScreen(navController: NavHostController) {
                 Modifier.clickable {
                     context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
                 },
-                supportingContent = { Text("本地词库的管理") },
+                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
+            )
+            ListItem(
+                { Text("查询本地词库(DEBUG)") },
+                Modifier.clickable {
+                    context.contentResolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null)?.use { cursor ->
+                        val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
+                        val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
+                        val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
+                        val appIdIndex = cursor.getColumnIndex(UserDictionary.Words.APP_ID)
+                        val idIndex = cursor.getColumnIndex(UserDictionary.Words._ID)
+                        while (cursor.moveToNext()) {
+                            val word = cursor.getString(wordIndex)
+                            val shortcut = cursor.getString(shortcutIndex)
+                            val frequency = cursor.getInt(freqIndex)
+                            val appid = cursor.getInt(appIdIndex)
+                            val id = cursor.getInt(idIndex)
+                            Log.d("TAG", "z:${id} ${appid} ${word} ${shortcut} ${frequency} ")
+                        }
+                    }
+                },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
             )
         }

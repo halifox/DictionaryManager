@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.provider.UserDictionary
 import android.util.Log
-import androidx.core.content.edit
 import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.dictionary.db.DictDao
@@ -24,28 +23,6 @@ import javax.inject.Singleton
 
 @Singleton
 class DictRepository @Inject constructor(private val context: Context, private val dao: DictDao) : DictDao by dao {
-    private val sp = context.getSharedPreferences("dict_state", Context.MODE_PRIVATE)
-
-    init {
-        //debug
-        context.contentResolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null)?.use { cursor ->
-            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
-            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
-            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
-            val appIdIndex = cursor.getColumnIndex(UserDictionary.Words.APP_ID)
-            val idIndex = cursor.getColumnIndex(UserDictionary.Words._ID)
-            while (cursor.moveToNext()) {
-                val word = cursor.getString(wordIndex)
-                val shortcut = cursor.getString(shortcutIndex)
-                val frequency = cursor.getInt(freqIndex)
-                val appid = cursor.getInt(appIdIndex)
-                val id = cursor.getInt(idIndex)
-                Log.d("TAG", "z:${id} ${appid} ${word} ${shortcut} ${frequency} ")
-            }
-        }
-    }
-
-
     fun parse(file: File): List<ParsedResult> {
         val parser = getParser(file.extension)
         val results = parser.parse(file.absolutePath)
@@ -72,22 +49,22 @@ class DictRepository @Inject constructor(private val context: Context, private v
         return ids.size
     }
 
-    suspend fun uninstall(dict: Dict) {
+    suspend fun uninstall(record: LocalRecord) {
         context.contentResolver.delete(
             UserDictionary.Words.CONTENT_URI,
-            "${UserDictionary.Words.APP_ID} = ?",
-            arrayOf(dict._id.toString())
+            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
+            record.ids.map { it.toString() }.toTypedArray(),
         )
-        dao.deleteById(dict._id)
+        dao.deleteById(record._id)
     }
 
-    fun getLocalWorlds(ids: List<Long>): List<ParsedResult> {
+    fun getLocalWorlds(record: LocalRecord): List<ParsedResult> {
         val results = mutableListOf<ParsedResult>()
         context.contentResolver.query(
             UserDictionary.Words.CONTENT_URI,
             null,
-            "${UserDictionary.Words.APP_ID} = ?",
-            arrayOf(ids.joinToString()),
+            "${UserDictionary.Words._ID} IN (${record.ids.joinToString(",") { "?" }})",
+            record.ids.map { it.toString() }.toTypedArray(),
             null
         )?.use { cursor ->
             val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
@@ -97,7 +74,6 @@ class DictRepository @Inject constructor(private val context: Context, private v
                 val word = cursor.getString(wordIndex)
                 val shortcut = cursor.getString(shortcutIndex)
                 val frequency = cursor.getInt(freqIndex)
-                Log.d("TAG", "getLocalWorlds: ${ParsedResult(word, shortcut, frequency.toFloat())}")
                 results.add(ParsedResult(word, shortcut, frequency.toFloat()))
             }
         }
