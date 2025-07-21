@@ -5,7 +5,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.github.dictionary.ui.theme.DictionaryTheme
-import okio.`-DeprecatedOkio`.source
 
 @Composable
 fun App() {
@@ -16,6 +15,7 @@ fun App() {
             composable("ime_permission") { PermissionCheckScreen(navController) }
             composable("home") { HomeScreen(navController) }
             composable("dictionary/{source}") { DictionaryScreen(navController, (it.arguments?.getString("source")).orEmpty()) }
+            composable("install/{_id}") { InstallScreen((it.arguments?.getString("_id")).orEmpty()) }
         }
     }
 }
