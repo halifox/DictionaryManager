@@ -3,8 +3,10 @@ package com.github.dictionary.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -35,11 +38,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.dictionary.model.Dict
 import kotlinx.coroutines.launch
@@ -53,8 +58,6 @@ fun DictionaryScreen(navController: NavHostController, source: String) {
     val scope = rememberCoroutineScope()
     val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
 
-    var currentDict by rememberSaveable { mutableStateOf<Dict?>(null) }
-    val items = viewModel.getSubTreeQuery(currentDict?.id, source).collectAsLazyPagingItems()
 
     val inputField =
         @Composable {
@@ -89,16 +92,37 @@ fun DictionaryScreen(navController: NavHostController, source: String) {
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {
                 val key = textFieldState.text.toString()
                 val items = viewModel.getSearchPager(source, "%${key}%").collectAsLazyPagingItems()
-                LazyColumn() {
-                    items(items.itemCount) { index ->
-                        DictItem(items[index])
+                LazyColumn(
+                    Modifier
+                        .fillMaxSize()
+                ) {
+                    val state = items.loadState.refresh
+                    when (state) {
+                        is LoadState.Error      -> item {
+                            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                Text("${state.error}")
+                            }
+                        }
+
+                        LoadState.Loading       -> item {
+                            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                LoadingIndicator()
+                            }
+                        }
+
+                        is LoadState.NotLoading -> items(items.itemCount) { index ->
+                            DictItem(navController, items[index])
+                        }
                     }
                 }
             }
         },
     ) {
+        var currentDict by rememberSaveable { mutableStateOf<Dict?>(null) }
+        val items = viewModel.getSubTreeQuery(currentDict?.id, source).collectAsLazyPagingItems()
         LazyColumn(
             Modifier
+                .fillMaxSize()
                 .padding(it)
         ) {
             item {
@@ -106,15 +130,30 @@ fun DictionaryScreen(navController: NavHostController, source: String) {
                     DictFilterChipGroup(viewModel, source, 1, null) { currentDict = it }
                 }
             }
-            items(items.itemCount) { index ->
-                DictItem(items[index])
+            val state = items.loadState.refresh
+            when (state) {
+                is LoadState.Error      -> item {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text("${state.error}")
+                    }
+                }
+
+                LoadState.Loading       -> item {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        LoadingIndicator()
+                    }
+                }
+
+                is LoadState.NotLoading -> items(items.itemCount) { index ->
+                    DictItem(navController, items[index])
+                }
             }
         }
     }
 }
 
 @Composable
-fun DictItem(dict: Dict?) {
+fun DictItem(navController: NavHostController, dict: Dict?) {
     dict ?: return
     var isExpand by remember(dict) { mutableStateOf(false) }
     ListItem(
@@ -137,7 +176,7 @@ fun DictItem(dict: Dict?) {
         trailingContent = {
             Button(
                 {
-
+                    navController.navigate("install/${dict._id}")
                 },
             ) {
                 Text("安装")
@@ -145,8 +184,6 @@ fun DictItem(dict: Dict?) {
         }
     )
     HorizontalDivider()
-
-
 }
 
 @Composable
