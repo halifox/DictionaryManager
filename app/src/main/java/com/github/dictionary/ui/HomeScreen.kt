@@ -31,11 +31,7 @@ fun HomeScreen(navController: NavHostController) {
             TopAppBar({ Text("词库管理器") })
         }
     ) {
-        Column(
-            Modifier
-                .padding(it)
-                .padding(16.dp, 0.dp)
-        ) {
+        Column(Modifier.padding(it)) {
             ListItem(
                 { Text("搜狗词库") },
                 Modifier.clickable { navController.navigate(Dictionary("sougo")) },

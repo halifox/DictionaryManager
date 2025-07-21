@@ -54,11 +54,7 @@ fun PermissionCheckScreen(navController: NavHostController) {
     }
 
     Scaffold {
-        Column(
-            Modifier
-                .padding(it)
-                .padding(16.dp,0.dp)
-        ) {
+        Column(Modifier.padding(it)) {
             Column(
                 Modifier
                     .fillMaxWidth()
