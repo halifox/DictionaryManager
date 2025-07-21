@@ -16,7 +16,7 @@ class DictionaryViewModel @Inject constructor(private val repo: DictRepository) 
     fun getSearchPager(source: String, key: String) = Pager(
         PagingConfig(pageSize = 20)
     ) {
-        repo.search(source, key)
+        repo.search(source, key, getMaxTiers(source))
     }.flow.cachedIn(viewModelScope)
 
     fun getSubTreeQuery(pid: String?, source: String) = Pager(
