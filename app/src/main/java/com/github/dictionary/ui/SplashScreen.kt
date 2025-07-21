@@ -14,13 +14,13 @@ fun SplashScreen(navController: NavHostController) {
     val context = LocalContext.current
     DisposableEffect(Unit) {
         if (checkInputMethodSettingsActive(context)) {
-            navController.navigate("home") {
+            navController.navigate(Home) {
                 popUpTo(0) {
                     inclusive = true
                 }
             }
         } else {
-            navController.navigate("ime_permission") {
+            navController.navigate(ImePermission) {
                 popUpTo(0) {
                     inclusive = true
                 }

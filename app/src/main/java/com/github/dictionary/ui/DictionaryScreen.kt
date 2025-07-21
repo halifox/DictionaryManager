@@ -51,7 +51,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DictionaryScreen(navController: NavHostController, source: String) {
+fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
+    val source = data.source
     val viewModel = hiltViewModel<DictionaryViewModel>()
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -176,7 +177,7 @@ fun DictItem(navController: NavHostController, dict: Dict?) {
         trailingContent = {
             Button(
                 {
-                    navController.navigate("install/${dict._id}")
+                    navController.navigate(Install(dict))
                 },
             ) {
                 Text("安装")

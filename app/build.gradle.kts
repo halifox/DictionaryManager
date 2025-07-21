@@ -5,6 +5,9 @@ plugins {
     id("com.google.devtools.ksp")
     id("androidx.room") version "2.7.2"
     id("com.google.dagger.hilt.android") version "2.57"
+
+    id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 android {
@@ -75,6 +78,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.57")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     ksp("com.google.dagger:hilt-android-compiler:2.57")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 }
 
 room {

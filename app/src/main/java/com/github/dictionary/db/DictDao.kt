@@ -9,6 +9,9 @@ import com.github.dictionary.model.Dict
 
 @Dao
 interface DictDao {
+    @Query("SELECT * FROM dict WHERE _id = :id")
+    suspend fun getDict(id: Int): Dict
+
     @Query("SELECT * FROM dict WHERE source = :source AND name LIKE :key AND tiers = :tiers ORDER BY id ASC")
     fun search(source: String, key: String, tiers: Int): PagingSource<Int, Dict>
 

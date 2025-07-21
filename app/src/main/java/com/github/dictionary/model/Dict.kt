@@ -2,7 +2,6 @@ package com.github.dictionary.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.io.Serializable
 
 @Entity(tableName = "dict")
 data class Dict(
@@ -16,4 +15,4 @@ data class Dict(
     val downCount: String?,
     val exps: String?,
     val tiers: String?,
-) : Serializable
+)

@@ -32,25 +32,25 @@ fun HomeScreen(navController: NavHostController) {
         ) {
             ListItem(
                 { Text("搜狗词库") },
-                Modifier.clickable { navController.navigate("dictionary/sougo") },
+                Modifier.clickable { navController.navigate(Dictionary("sougo")) },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.sogou, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("百度词库") },
-                Modifier.clickable { navController.navigate("dictionary/baidu") },
+                Modifier.clickable { navController.navigate(Dictionary("baidu")) },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.baidu, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("QQ词库") },
-                Modifier.clickable { navController.navigate("dictionary/qq") },
+                Modifier.clickable { navController.navigate(Dictionary("qq")) },
                 supportingContent = { Text("声明:仅供学习交流") },
                 leadingContent = { AsyncImage(R.raw.qq, null, Modifier.size(28.dp)) },
             )
             ListItem(
                 { Text("本地词库") },
-                Modifier.clickable { navController.navigate("dictionary/local") },
+                Modifier.clickable { navController.navigate(Dictionary("local")) },
                 supportingContent = { Text("本地词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
             )

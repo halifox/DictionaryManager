@@ -37,7 +37,7 @@ fun PermissionCheckScreen(navController: NavHostController) {
             when (event) {
                 Lifecycle.Event.ON_START -> {
                     if (checkInputMethodSettingsActive(context)) {
-                        navController.navigate("home") {
+                        navController.navigate(Home) {
                             popUpTo(0) {
                                 inclusive = true
                             }
