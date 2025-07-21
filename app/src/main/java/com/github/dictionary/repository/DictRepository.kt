@@ -1,16 +1,61 @@
 package com.github.dictionary.repository
 
+import android.content.ContentValues
+import android.content.Context
+import android.provider.UserDictionary
 import android.util.Log
+import android.widget.Toast
+import androidx.core.content.edit
 import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.dictionary.db.DictDao
 import com.github.dictionary.model.Dict
+import com.github.dictionary.parser.BaiduParser
+import com.github.dictionary.parser.IParser
+import com.github.dictionary.parser.QQParser
+import com.github.dictionary.parser.SougoParser
 import org.intellij.lang.annotations.Language
+import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DictRepository @Inject constructor(private val dao: DictDao) : DictDao by dao {
+class DictRepository @Inject constructor(private val context: Context, private val dao: DictDao) : DictDao by dao {
+    private val sp = context.getSharedPreferences("dict_state", Context.MODE_PRIVATE)
+
+    fun setInstalled(dict: Dict) {
+        sp.edit {
+            putBoolean(dict._id.toString(), true)
+        }
+    }
+
+    fun isInstalled(dict: Dict): Boolean {
+        return sp.getBoolean(dict._id.toString(), false)
+    }
+
+
+    fun install(file: File, dict: Dict) {
+        val parser = getParser(file.extension)
+        val results = parser.parse(file.absolutePath)
+        val values = results.map {
+            ContentValues().apply {
+                put(UserDictionary.Words.WORD, it.word)
+                put(UserDictionary.Words.SHORTCUT, it.pinyin)
+                put(UserDictionary.Words.FREQUENCY, it.wordFrequency.toInt())
+                put(UserDictionary.Words.LOCALE, Locale.SIMPLIFIED_CHINESE.toString())
+                put(UserDictionary.Words.APP_ID, dict.id)
+            }
+        }.toTypedArray()
+        val size = context.contentResolver.bulkInsert(UserDictionary.Words.CONTENT_URI, values)
+        Toast.makeText(context, "${size}/${results.size}", Toast.LENGTH_SHORT).show()
+        file.delete()
+        setInstalled(dict)
+    }
+
+    fun delete(dict: Dict) {
+        context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
+    }
 
     fun getSubTreeQuery(pid: String, source: String, tiers: Int): PagingSource<Int, Dict> {
         /**
@@ -47,5 +92,42 @@ class DictRepository @Inject constructor(private val dao: DictDao) : DictDao by 
         val query = SimpleSQLiteQuery(sql, arrayOf(pid, source, tiers))
         return dao.getSubTree(query)
     }
+
+    fun getParser(extension: String): IParser {
+        return when (extension) {
+            "scel"/*sougo*/ -> SougoParser()
+            "bdict"/*baidu*/ -> BaiduParser()
+            "qpyd"/*qq*/ -> QQParser()
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    fun getDownloadUrl(dict: Dict): String {
+        return when (dict.source) {
+            "sougo" -> "https://pinyin.sogou.com/d/dict/download_cell.php?id=${dict.id}&name=${dict.name}"
+            "baidu" -> "https://shurufa.baidu.com/dict_innerid_download?innerid=${dict.innerId}"
+            "qq" -> "https://cdict.qq.pinyin.cn/v1/download?dict_id=${dict.id}"
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    fun getFileName(dict: Dict): String {
+        return when (dict.source) {
+            "sougo" -> "${dict.id}.scel"
+            "baidu" -> "${dict.id}.bdict"
+            "qq" -> "${dict.id}.qpyd"
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    fun getMaxTiers(source: String): Int {
+        return when (source) {
+            "sougo" -> 4
+            "baidu" -> 3
+            "qq" -> 4
+            else -> 0
+        }
+    }
+
 
 }

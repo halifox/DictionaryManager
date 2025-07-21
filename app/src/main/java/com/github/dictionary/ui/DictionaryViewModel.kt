@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.github.dictionary.model.Dict
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
@@ -16,29 +17,19 @@ class DictionaryViewModel @Inject constructor(private val repo: DictRepository) 
     fun getSearchPager(source: String, key: String) = Pager(
         PagingConfig(pageSize = 20)
     ) {
-        repo.search(source, key, getMaxTiers(source))
+        repo.search(source, key, repo.getMaxTiers(source))
     }.flow.cachedIn(viewModelScope)
 
     fun getSubTreeQuery(pid: String?, source: String) = Pager(
         PagingConfig(pageSize = 20)
     ) {
-        repo.getSubTreeQuery(pid ?: "0", source, getMaxTiers(source))
+        repo.getSubTreeQuery(pid ?: "0", source, repo.getMaxTiers(source))
     }.flow.cachedIn(viewModelScope)
 
     fun getCategories(source: String, pid: String?, tiers: Int) = callbackFlow {
-        if (tiers < getMaxTiers(source)) {
+        if (tiers < repo.getMaxTiers(source)) {
             send(repo.getCategories(source, pid ?: "0", tiers))
         }
         awaitClose {}
     }
-
-    fun getMaxTiers(source: String): Int {
-        return when (source) {
-            "sougo" -> 4
-            "baidu" -> 3
-            "qq"    -> 4
-            else    -> 0
-        }
-    }
-
 }
