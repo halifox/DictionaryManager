@@ -1,11 +1,17 @@
 package com.github.dictionary.ui
 
+import android.app.Application
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,15 +23,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.dictionary.model.Dict
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.internal.http.promisesBody
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -49,7 +62,7 @@ fun InstallScreen(data: Install) {
         return
     }
     val dict = (uiState as UiState.Success).data
-
+    val progress by viewModel.progress.collectAsState()
 
     Scaffold(
         topBar = {
@@ -59,7 +72,8 @@ fun InstallScreen(data: Install) {
         }
     ) {
         Column(Modifier.padding(it)) {
-            Text("${data.id}")
+            LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
+            Text("${progress}")
         }
     }
 }
@@ -72,17 +86,99 @@ sealed class UiState<out T> {
 
 
 @HiltViewModel
-class InstallViewModel @Inject constructor(private val repo: DictRepository) : ViewModel() {
+class InstallViewModel @Inject constructor(private val repo: DictRepository, application: Application) : AndroidViewModel(application) {
+    val context = application
     private val _uiState = MutableStateFlow<UiState<Dict>>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
+
+    val client = OkHttpClient.Builder().build()
+    val progress = MutableStateFlow(0f)
+
     fun init(data: Install) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val dict = repo.getDict(data.id)
                 _uiState.value = UiState.Success(dict)
+                download(dict)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+
+    fun getDownloadUrl(dict: Dict): String {
+        return when (dict.source) {
+            "sougo" -> "https://pinyin.sogou.com/d/dict/download_cell.php?id=${dict.id}&name=${dict.name}"
+            "baidu" -> "https://shurufa.baidu.com/dict_innerid_download?innerid=${dict.innerId}"
+            "qq" -> "https://cdict.qq.pinyin.cn/v1/download?dict_id=${dict.id}"
+            else -> throw IllegalArgumentException("")
+        }
+    }
+
+    fun getFileName(dict: Dict): String {
+        return when (dict.source) {
+            "sougo" -> "${dict.id}.scel"
+            "baidu" -> "${dict.id}.bdict"
+            "qq" -> "${dict.id}.qpyd"
+            else -> throw IllegalArgumentException("")
+        }
+    }
+
+
+    suspend fun download(dict: Dict) {
+        val url = getDownloadUrl(dict)
+        Log.d(TAG, "url:${url} ")
+        val fn = getFileName(dict)
+        val file = File(context.cacheDir, fn)
+        Log.d(TAG, "file:${file} ")
+        if (file.exists()) {
+            return
+        }
+        val request = Request.Builder()
+            .get()
+            .url(url)
+            .build()
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw IllegalArgumentException("服务器响应异常")
+        }
+        if (!response.promisesBody()) {
+            throw IllegalArgumentException("服务器响应异常")
+        }
+        val body = response.body ?: return
+        val contentLength = body.contentLength()
+
+        val inputStream = body.byteStream()
+        val tmpFile = File(context.cacheDir, "${fn}.tmp")
+        val outputStream = FileOutputStream(tmpFile)
+
+        try {
+            var bytesCopied: Long = 0
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                delay(1000)
+                val bytes = inputStream.read(buffer)
+                if (bytes == -1) break
+                outputStream.write(buffer, 0, bytes)
+                bytesCopied += bytes
+                progress.value = bytesCopied * 1f / contentLength
+            }
+        } catch (e: Exception) {
+            throw e
+        } finally {
+            inputStream.close()
+            outputStream.close()
+        }
+        tmpFile.renameTo(file)
+        install(file)
+    }
+
+    fun install(file: File) {
+
+    }
+
+    companion object {
+        private const val TAG = "InstallScreen"
     }
 }
