@@ -36,7 +36,7 @@ class DictionaryViewModel @Inject constructor(private val repo: DictRepository) 
         return when (source) {
             "sougo" -> 4
             "baidu" -> 3
-            "qq"    -> 3
+            "qq"    -> 4
             else    -> 0
         }
     }
