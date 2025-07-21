@@ -54,7 +54,7 @@ fun InstallScreen(data: Install) {
     Scaffold(
         topBar = {
             TopAppBar({
-                Text(dict.name)
+                Text(dict.name.orEmpty())
             })
         }
     ) {

@@ -177,7 +177,7 @@ fun DictItem(navController: NavHostController, dict: Dict?) {
         trailingContent = {
             Button(
                 {
-                    navController.navigate(Install(dict))
+                    navController.navigate(Install(dict._id))
                 },
             ) {
                 Text("安装")
