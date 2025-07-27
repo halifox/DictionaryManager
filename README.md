@@ -94,13 +94,12 @@
 
 <p float="center">
    <img src="./screenshot/Screenshot_20250728_013235.webp" width="24%"/>
-   <img src="./screenshot/Screenshot_20250728_013257.webp" width="24%"/>
+   <img src="./screenshot/Screenshot_20250728_023818.webp" width="24%"/>
+   <img src="./screenshot/Screenshot_20250728_023909.webp" width="24%"/>
    <img src="./screenshot/Screenshot_20250728_014028.webp" width="24%"/>
 </p>
 <p float="center">
    <img src="./screenshot/Screenshot_20250728_013338.webp" width="24%"/>
-   <img src="./screenshot/Screenshot_20250728_013406.webp" width="24%"/>
-   <img src="./screenshot/Screenshot_20250728_014417.webp" width="24%"/>
 </p>
 
 ---
