@@ -102,9 +102,9 @@ class DictRepository @Inject constructor(private val context: Context, private v
         return results
     }
 
-    suspend fun installUserDictionary(dict: Dict, data: List<ParsedResult>): Int {
+    suspend fun installUserDictionary(dict: Dict, parsedResults: List<ParsedResult>): Int {
         val ids = mutableListOf<Long>()
-        data.forEach {
+        parsedResults.forEach {
             val values = ContentValues().apply {
                 put(UserDictionary.Words.WORD, it.word)
                 put(UserDictionary.Words.SHORTCUT, it.pinyin)

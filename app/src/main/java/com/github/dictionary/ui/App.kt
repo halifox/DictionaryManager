@@ -17,7 +17,7 @@ fun App() {
             composable<PermissionCheck> { PermissionCheckScreen(navController) }
             composable<Home> { HomeScreen(navController) }
             composable<Dictionary> { DictionaryScreen(navController, it.toRoute()) }
-            composable<DictionaryDetail> { DictionaryDetailScreen(it.toRoute()) }
+            composable<DictionaryDetail> { DictionaryDetailScreen(navController, it.toRoute()) }
             composable<LocalDictionary> { LocalDictionaryScreen(navController) }
         }
     }
@@ -41,4 +41,3 @@ data class Dictionary(val source: String)
 
 @Serializable
 data class DictionaryDetail(val id: Int)
-

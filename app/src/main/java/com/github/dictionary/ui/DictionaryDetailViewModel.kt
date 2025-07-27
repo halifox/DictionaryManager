@@ -10,7 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,47 +18,80 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
+sealed class UiState<out T> {
+    object Idle : UiState<Nothing>()
+    data class Loading(val progress: Float) : UiState<Nothing>()
+    data class Success<T>(val data: T) : UiState<T>()
+    data class Error(val exception: Throwable) : UiState<Nothing>()
+}
+
+sealed class InstallState {
+    object Idle : InstallState()
+    object Installing : InstallState()
+    object Installed : InstallState()
+    object Uninstalling : InstallState()
+    object Uninstalled : InstallState()
+}
+
 @HiltViewModel
 class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, application: Application) : AndroidViewModel(application) {
     val context = application
-    private val _uiState = MutableStateFlow<DictionaryDetailState>(DictionaryDetailState.Idle)
-    val uiState = _uiState.asStateFlow()
 
     val client = OkHttpClient.Builder().build()
-    val progress = MutableStateFlow(0f)
-    lateinit var dict: Dict
-    val results = MutableStateFlow(emptyList<ParsedResult>())
 
+    val installState = MutableStateFlow<InstallState>(InstallState.Idle)
+    val dictState = MutableStateFlow<UiState<Dict>>(UiState.Idle)
+    val parsedResultsState = MutableStateFlow<UiState<List<ParsedResult>>>(UiState.Idle)
 
-    fun init(id: Int) {
+    fun loadDictionary(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                dict = repo.getDictionaryById(id)
+                dictState.value = UiState.Loading(0.5f)
+                val dict = repo.getDictionaryById(id)
+                dictState.value = UiState.Success(dict)
+            } catch (e: Exception) {
+                dictState.value = UiState.Error(e)
+            }
+        }
+    }
+
+    fun loadDictionaryDetail(dict: Dict) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
                 val localRecord = repo.getRecordById(dict._id)
                 if (localRecord == null) {
-                    downloadUserDictionary(dict)
-                    _uiState.value = DictionaryDetailState.Uninstalled
+                    val file = downloadUserDictionary(dict)
+                    val results = repo.parseUserDictionaryFile(file)
+                    parsedResultsState.value = UiState.Success(results)
                 } else {
-                    results.value = repo.queryUserDictionaryByIds(localRecord)
-                    _uiState.value = DictionaryDetailState.Installed
+                    val results = repo.queryUserDictionaryByIds(localRecord)
+                    parsedResultsState.value = UiState.Success(results)
                 }
             } catch (e: Exception) {
-                _uiState.value = DictionaryDetailState.Error(e)
-                e.printStackTrace()
+                parsedResultsState.value = UiState.Error(e)
+            }
+        }
+    }
+
+    fun loadDictionaryIsInstalled(dict: Dict) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val localRecord = repo.getRecordById(dict._id)
+            if (localRecord != null) {
+                installState.value = InstallState.Installed
+            } else {
+                installState.value = InstallState.Uninstalled
             }
         }
     }
 
 
-    suspend fun downloadUserDictionary(dict: Dict) {
+    suspend fun downloadUserDictionary(dict: Dict): File {
         val url = repo.getUserDictionaryDownloadUrl(dict)
         val fn = repo.getUserDictionaryFileName(dict)
         val file = File(context.cacheDir, fn)
         if (file.exists()) {
-            results.value = repo.parseUserDictionaryFile(file)
-            return
+            return file
         }
-        _uiState.value = DictionaryDetailState.Downloading
         val request = Request.Builder()
             .get()
             .url(url)
@@ -71,7 +103,7 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
         if (!response.promisesBody()) {
             throw IllegalArgumentException("服务器响应异常")
         }
-        val body = response.body ?: return
+        val body = response.body!!
         val contentLength = body.contentLength()
 
         val inputStream = body.byteStream()
@@ -86,7 +118,9 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
                 if (bytes == -1) break
                 outputStream.write(buffer, 0, bytes)
                 bytesCopied += bytes
-                progress.value = bytesCopied * 1f / contentLength
+                val progress = bytesCopied * 1f / contentLength
+                parsedResultsState.value = UiState.Loading(progress)
+                delay(1000)
             }
         } catch (e: Exception) {
             throw e
@@ -95,26 +129,26 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
             outputStream.close()
         }
         tmpFile.renameTo(file)
-        results.value = repo.parseUserDictionaryFile(file)
+        return file
     }
 
 
-    fun installUserDictionary() {
+    fun installUserDictionary(dict: Dict, parsedResults: List<ParsedResult>) {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.value = DictionaryDetailState.Installing
-            repo.installUserDictionary(dict, results.value)
-            _uiState.value = DictionaryDetailState.Installed
+            installState.value = InstallState.Installing
+            repo.installUserDictionary(dict, parsedResults)
+            installState.value = InstallState.Installed
         }
     }
 
-    fun uninstallUserDictionary() {
+    fun uninstallUserDictionary(dict: Dict) {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.value = DictionaryDetailState.UnInstalling
+            installState.value = InstallState.Uninstalling
             val localRecord = repo.getRecordById(dict._id)
             if (localRecord != null) {
                 repo.uninstallUserDictionary(localRecord)
             }
-            _uiState.value = DictionaryDetailState.Uninstalled
+            installState.value = InstallState.Uninstalled
         }
     }
 }
