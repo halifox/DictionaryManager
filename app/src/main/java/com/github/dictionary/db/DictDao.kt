@@ -31,7 +31,12 @@ interface DictDao {
     @Query("SELECT * FROM record WHERE _id = :id")
     suspend fun getRecordById(id: Int): LocalRecord?
 
+    @Query("SELECT * FROM record")
+    fun getRecords(): PagingSource<Int, LocalRecord>
+
+    @Query("SELECT dict.* FROM dict  JOIN record ON dict._id = record._id")
+    fun getRecords2(): PagingSource<Int, Dict>
+
     @Query("DELETE FROM record WHERE _id = :id")
     suspend fun deleteRecordById(id: Int)
-
 }

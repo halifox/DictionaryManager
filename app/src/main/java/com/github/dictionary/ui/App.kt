@@ -18,9 +18,11 @@ fun App() {
             composable<Home> { HomeScreen(navController) }
             composable<Dictionary> { DictionaryScreen(navController, it.toRoute()) }
             composable<Install> { InstallScreen(it.toRoute()) }
+            composable<LocalDictionary> { LocalDictionaryScreen(navController) }
         }
     }
 }
+
 
 
 @Serializable
@@ -38,3 +40,5 @@ data class Dictionary(val source: String)
 @Serializable
 data class Install(val id: Int)
 
+@Serializable
+object LocalDictionary

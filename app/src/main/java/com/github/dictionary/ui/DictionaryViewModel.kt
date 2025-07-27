@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class DictionaryViewModel @Inject constructor(private val repo: DictRepository) : ViewModel() {
+class DictionaryViewModel @Inject constructor(val repo: DictRepository) : ViewModel() {
     fun getSearchPager(source: String, key: String) = Pager(
         PagingConfig(pageSize = 20)
     ) {
@@ -31,4 +31,17 @@ class DictionaryViewModel @Inject constructor(private val repo: DictRepository) 
         }
         awaitClose {}
     }
+
+    fun getRecords() = Pager(
+        PagingConfig(pageSize = 20)
+    ) {
+        repo.getRecords()
+    }.flow.cachedIn(viewModelScope)
+
+    fun getRecords2() = Pager(
+        PagingConfig(pageSize = 20)
+    ) {
+        repo.getRecords2()
+    }.flow.cachedIn(viewModelScope)
+
 }

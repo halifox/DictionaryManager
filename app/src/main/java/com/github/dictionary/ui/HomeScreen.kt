@@ -52,11 +52,16 @@ fun HomeScreen(navController: NavHostController) {
             )
             ListItem(
                 { Text("本地词库") },
+                Modifier.clickable { navController.navigate(LocalDictionary) },
+                supportingContent = { Text("本地词库的管理") },
+                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
+            )
+            ListItem(
+                { Text("本地词库(系统)") },
                 Modifier.clickable {
                     val intent = Intent(Settings.ACTION_USER_DICTIONARY_SETTINGS)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
-
                 },
                 supportingContent = { Text("本地词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
