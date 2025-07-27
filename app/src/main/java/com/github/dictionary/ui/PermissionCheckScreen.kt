@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -44,7 +43,8 @@ fun PermissionCheckScreen(navController: NavHostController) {
                         }
                     }
                 }
-                else                     -> {}
+
+                else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

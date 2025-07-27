@@ -51,9 +51,9 @@ fun HomeScreen(navController: NavHostController) {
                 leadingContent = { AsyncImage(R.raw.qq, null, Modifier.size(28.dp)) },
             )
             ListItem(
-                { Text("本地词库") },
+                { Text("已安装的词库") },
                 Modifier.clickable { navController.navigate(LocalDictionary) },
-                supportingContent = { Text("本地词库的管理") },
+                supportingContent = { Text("已安装的词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
             )
             ListItem(
@@ -66,34 +66,34 @@ fun HomeScreen(navController: NavHostController) {
                 supportingContent = { Text("本地词库的管理") },
                 leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
             )
-            ListItem(
-                { Text("清空本地词库(DEBUG)") },
-                Modifier.clickable {
-                    context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
-                },
-                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
-            )
-            ListItem(
-                { Text("查询本地词库(DEBUG)") },
-                Modifier.clickable {
-                    context.contentResolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null)?.use { cursor ->
-                        val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
-                        val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
-                        val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
-                        val appIdIndex = cursor.getColumnIndex(UserDictionary.Words.APP_ID)
-                        val idIndex = cursor.getColumnIndex(UserDictionary.Words._ID)
-                        while (cursor.moveToNext()) {
-                            val word = cursor.getString(wordIndex)
-                            val shortcut = cursor.getString(shortcutIndex)
-                            val frequency = cursor.getInt(freqIndex)
-                            val appid = cursor.getInt(appIdIndex)
-                            val id = cursor.getInt(idIndex)
-                            Log.d("TAG", "z:${id} ${appid} ${word} ${shortcut} ${frequency} ")
+            if (com.github.dictionary.BuildConfig.DEBUG) {
+                ListItem(
+                    { Text("清空本地词库(DEBUG)") },
+                    Modifier.clickable {
+                        context.contentResolver.delete(UserDictionary.Words.CONTENT_URI, null, null)
+                    },
+                )
+                ListItem(
+                    { Text("打印本地词库信息(DEBUG)") },
+                    Modifier.clickable {
+                        context.contentResolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null)?.use { cursor ->
+                            val wordIndex = cursor.getColumnIndex(UserDictionary.Words.WORD)
+                            val shortcutIndex = cursor.getColumnIndex(UserDictionary.Words.SHORTCUT)
+                            val freqIndex = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY)
+                            val appIdIndex = cursor.getColumnIndex(UserDictionary.Words.APP_ID)
+                            val idIndex = cursor.getColumnIndex(UserDictionary.Words._ID)
+                            while (cursor.moveToNext()) {
+                                val word = cursor.getString(wordIndex)
+                                val shortcut = cursor.getString(shortcutIndex)
+                                val frequency = cursor.getInt(freqIndex)
+                                val appid = cursor.getInt(appIdIndex)
+                                val id = cursor.getInt(idIndex)
+                                Log.d("TAG", "z:${id} ${appid} ${word} ${shortcut} ${frequency} ")
+                            }
                         }
-                    }
-                },
-                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
-            )
+                    },
+                )
+            }
         }
     }
 }

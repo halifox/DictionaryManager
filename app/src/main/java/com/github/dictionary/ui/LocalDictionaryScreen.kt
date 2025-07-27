@@ -23,9 +23,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 fun LocalDictionaryScreen(navController: NavHostController) {
     val viewModel = hiltViewModel<DictionaryViewModel>()
     Scaffold(
-        topBar = {
-            TopAppBar({ Text("已安装的词典") })
-        },
+        topBar = { TopAppBar({ Text("已安装的词库") }) },
     ) {
         val items = viewModel.getInstalledDictionaries().collectAsLazyPagingItems()
         LazyColumn(
@@ -48,7 +46,7 @@ fun LocalDictionaryScreen(navController: NavHostController) {
                 }
 
                 is LoadState.NotLoading -> items(items.itemCount) { index ->
-                    DictItem(navController, items[index])
+                    DictionaryItem(navController, items[index])
                 }
             }
         }

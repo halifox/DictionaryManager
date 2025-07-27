@@ -114,7 +114,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
                         }
 
                         is LoadState.NotLoading -> items(items.itemCount) { index ->
-                            DictItem(navController, items[index])
+                            DictionaryItem(navController, items[index])
                         }
                     }
                 }
@@ -130,7 +130,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
         ) {
             item {
                 Column {
-                    DictFilterChipGroup(viewModel, source, 1, null) { currentDict = it }
+                    DictionaryFilterChipGroup(viewModel, source, 1, null) { currentDict = it }
                 }
             }
             val state = items.loadState.refresh
@@ -148,7 +148,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
                 }
 
                 is LoadState.NotLoading -> items(items.itemCount) { index ->
-                    DictItem(navController, items[index])
+                    DictionaryItem(navController, items[index])
                 }
             }
         }
@@ -156,7 +156,7 @@ fun DictionaryScreen(navController: NavHostController, data: Dictionary) {
 }
 
 @Composable
-fun DictItem(navController: NavHostController, dict: Dict?) {
+fun DictionaryItem(navController: NavHostController, dict: Dict?) {
     dict ?: return
     var isExpand by remember(dict) { mutableStateOf(false) }
     ListItem(
@@ -192,7 +192,7 @@ fun DictItem(navController: NavHostController, dict: Dict?) {
 }
 
 @Composable
-fun DictFilterChipGroup(
+fun DictionaryFilterChipGroup(
     viewModel: DictionaryViewModel,
     source: String,
     tiers: Int,
@@ -227,6 +227,6 @@ fun DictFilterChipGroup(
         }
     }
     if (currentDict != null) {
-        DictFilterChipGroup(viewModel, source, tiers + 1, currentDict, onSelected)
+        DictionaryFilterChipGroup(viewModel, source, tiers + 1, currentDict, onSelected)
     }
 }

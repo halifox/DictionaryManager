@@ -3,7 +3,6 @@ package com.github.dictionary.parser
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.collections.plusAssign
 
 /**
  * 百度词库规则：

@@ -45,7 +45,7 @@ class SougoParser : IParser {
          * 魔道祖师【官方推荐】
          * 其它
          * 粉丝们，蓝忘机和魏无羡在这里等你哦~
-         * 魔道祖师 魏无羡 阴虎符 云梦江氏 江澄 无上邪尊 
+         * 魔道祖师 魏无羡 阴虎符 云梦江氏 江澄 无上邪尊
          */
 //        println(titleBytes.toString(Charsets.UTF_16LE))
 //        println(categoryBytes.toString(Charsets.UTF_16LE))
