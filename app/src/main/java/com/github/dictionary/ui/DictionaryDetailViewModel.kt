@@ -120,7 +120,6 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
                 bytesCopied += bytes
                 val progress = bytesCopied * 1f / contentLength
                 parsedResultsState.value = UiState.Loading(progress)
-                delay(1000)
             }
         } catch (e: Exception) {
             throw e
