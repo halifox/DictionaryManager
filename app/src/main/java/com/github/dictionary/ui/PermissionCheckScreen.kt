@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -69,9 +70,12 @@ fun PermissionCheckScreen(navController: NavHostController) {
                     { Icon(Icons.Default.Security, contentDescription = null) }
                 )
             }
-            Button({
-                requestInputMethodSettingsActive(context)
-            }, Modifier.fillMaxWidth()) {
+            Button(
+                { requestInputMethodSettingsActive(context) },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 0.dp),
+            ) {
                 Text("申请权限")
             }
         }

@@ -35,20 +35,22 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
     val listState = rememberLazyListState()
 
     val uiState by viewModel.uiState.collectAsState()
+    if (uiState == DictionaryDetailState.Idle) {
+        return LoadingIndicatorScreen()
+    }
     if (uiState is DictionaryDetailState.Error) {
         val uiState = uiState as DictionaryDetailState.Error
         return ErrorScreen(uiState.exception)
     }
-    if (uiState == DictionaryDetailState.Loading) {
-        return LoadingIndicatorScreen()
-    }
 
-    val (dict, localRecord) = uiState as DictionaryDetailState.Installed
-    val isBusy by viewModel.isBusy.collectAsState()
-    val progress by viewModel.progress.collectAsState()
+
     val results by viewModel.results.collectAsState()
     Scaffold(
-        topBar = { TopAppBar({ Text(dict.name.orEmpty()) }) }
+        topBar = {
+            TopAppBar({
+                Text(viewModel.dict.name.orEmpty())
+            })
+        }
     ) {
         Column(
             Modifier
@@ -56,7 +58,8 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
                 .padding(it)
 
         ) {
-            if (results.isEmpty()) {
+            if (uiState is DictionaryDetailState.Downloading) {
+                val progress by viewModel.progress.collectAsState()
                 LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
             }
             LazyColumn(
@@ -67,42 +70,37 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
             ) {
                 items(results) {
                     ListItem(
-                        { Text(it.pinyin) },
-                        supportingContent = { Text(it.word) }
+                        { Text(it.word) },
+                        supportingContent = { Text(it.pinyin) }
                     )
                     HorizontalDivider()
                 }
             }
-            if (isBusy) {
-                Button(
-                    { },
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 0.dp),
-                    enabled = false
-                ) {
-                    Text("处理中")
-                }
-            } else if (localRecord == null) {
-                Button(
-                    { viewModel.installUserDictionary(dict, results) },
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 0.dp),
-                ) {
-                    Text("安装")
-                }
-            } else {
-                Button(
-                    { viewModel.uninstallUserDictionary(dict, localRecord) },
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 0.dp),
-                ) {
-                    Text("删除")
-                }
+            when (uiState) {
+                DictionaryDetailState.UnInstalling -> DictionaryDetailButton("卸载中")
+                DictionaryDetailState.Installing -> DictionaryDetailButton("安装中")
+                DictionaryDetailState.Uninstalled -> DictionaryDetailButton("安装", viewModel::installUserDictionary)
+                DictionaryDetailState.Installed -> DictionaryDetailButton("安装", viewModel::uninstallUserDictionary)
+                DictionaryDetailState.Downloading -> DictionaryDetailButton("下载中")
+                else -> null
             }
-
         }
     }
+}
+
+@Composable
+fun DictionaryDetailButton(
+    text: String,
+    onClick: (() -> Unit)? = null,
+) {
+    Button(
+        { onClick?.invoke() },
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp, 0.dp),
+        enabled = onClick != null
+    ) {
+        Text(text)
+    }
+
 }

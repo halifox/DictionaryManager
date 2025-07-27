@@ -1,10 +1,11 @@
 package com.github.dictionary.ui
 
-import com.github.dictionary.model.Dict
-import com.github.dictionary.model.LocalRecord
-
 sealed class DictionaryDetailState {
-    object Loading : DictionaryDetailState()
+    object Idle : DictionaryDetailState()
+    object Downloading : DictionaryDetailState()
+    object Uninstalled : DictionaryDetailState()
+    object Installed : DictionaryDetailState()
+    object Installing : DictionaryDetailState()
+    object UnInstalling : DictionaryDetailState()
     data class Error(val exception: Exception) : DictionaryDetailState()
-    data class Installed(val dict: Dict, val localRecord: LocalRecord?) : DictionaryDetailState()
 }

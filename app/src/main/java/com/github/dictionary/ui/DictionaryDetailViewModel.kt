@@ -4,11 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.dictionary.model.Dict
-import com.github.dictionary.model.LocalRecord
 import com.github.dictionary.parser.ParsedResult
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,31 +22,30 @@ import javax.inject.Inject
 @HiltViewModel
 class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, application: Application) : AndroidViewModel(application) {
     val context = application
-    private val _uiState = MutableStateFlow<DictionaryDetailState>(DictionaryDetailState.Loading)
+    private val _uiState = MutableStateFlow<DictionaryDetailState>(DictionaryDetailState.Idle)
     val uiState = _uiState.asStateFlow()
 
     val client = OkHttpClient.Builder().build()
     val progress = MutableStateFlow(0f)
+    lateinit var dict: Dict
     val results = MutableStateFlow(emptyList<ParsedResult>())
-    val isBusy = MutableStateFlow(false)
+
 
     fun init(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                isBusy.value = true
-                val dict = repo.getDictionaryById(id)
+                dict = repo.getDictionaryById(id)
                 val localRecord = repo.getRecordById(dict._id)
-                _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
                 if (localRecord == null) {
                     downloadUserDictionary(dict)
+                    _uiState.value = DictionaryDetailState.Uninstalled
                 } else {
                     results.value = repo.queryUserDictionaryByIds(localRecord)
+                    _uiState.value = DictionaryDetailState.Installed
                 }
             } catch (e: Exception) {
                 _uiState.value = DictionaryDetailState.Error(e)
                 e.printStackTrace()
-            } finally {
-                isBusy.value = false
             }
         }
     }
@@ -60,6 +59,7 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
             results.value = repo.parseUserDictionaryFile(file)
             return
         }
+        _uiState.value = DictionaryDetailState.Downloading
         val request = Request.Builder()
             .get()
             .url(url)
@@ -99,28 +99,22 @@ class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, ap
     }
 
 
-    fun installUserDictionary(dict: Dict, data: List<ParsedResult>) {
+    fun installUserDictionary() {
         viewModelScope.launch(Dispatchers.IO) {
-            isBusy.value = true
-            repo.installUserDictionary(dict, data)
-            val localRecord = repo.getRecordById(dict._id)
-            _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
-            isBusy.value = false
+            _uiState.value = DictionaryDetailState.Installing
+            repo.installUserDictionary(dict, results.value)
+            _uiState.value = DictionaryDetailState.Installed
         }
     }
 
-    fun uninstallUserDictionary(dict: Dict, record: LocalRecord) {
+    fun uninstallUserDictionary() {
         viewModelScope.launch(Dispatchers.IO) {
-            isBusy.value = true
-            repo.uninstallUserDictionary(record)
+            _uiState.value = DictionaryDetailState.UnInstalling
             val localRecord = repo.getRecordById(dict._id)
-            _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
-            isBusy.value = false
+            if (localRecord != null) {
+                repo.uninstallUserDictionary(localRecord)
+            }
+            _uiState.value = DictionaryDetailState.Uninstalled
         }
-    }
-
-
-    companion object {
-        private const val TAG = "InstallScreen"
     }
 }
