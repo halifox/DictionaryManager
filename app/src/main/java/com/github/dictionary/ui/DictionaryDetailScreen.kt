@@ -8,15 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -40,146 +36,59 @@ fun DictionaryDetailScreen(navController: NavHostController, data: DictionaryDet
         viewModel.loadDictionary(id)
     }
     val dictState by viewModel.dictState.collectAsState()
-    when (dictState) {
-        UiState.Idle -> {
 
+    UiStateScaffold(dictState) {
+        val (dict) = dictState as UiState.Success
+        LaunchedEffect(dict) {
+            viewModel.loadDictionaryDetail(dict)
+            viewModel.loadDictionaryIsInstalled(dict)
         }
-
-        is UiState.Error -> {
-            val (exception) = dictState as UiState.Error
-            Scaffold(topBar = {
-                TopAppBar({
-                    Text("异常")
-                })
-            }) {
-                Text(
-                    exception.stackTraceToString(),
+        val parsedResultsState by viewModel.parsedResultsState.collectAsState()
+        UiStateScaffold(parsedResultsState) {
+            val installState by viewModel.installState.collectAsState()
+            val listState = rememberLazyListState()
+            Scaffold(topBar = { TopAppBar({ Text(dict.name.orEmpty()) }) }) {
+                val (parsedResults) = parsedResultsState as UiState.Success<List<ParsedResult>>
+                if (parsedResults.isEmpty()) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(it),
+                    ) {
+                        Text("无法解析出结果,请提供解析规则.", Modifier.align(Alignment.Center))
+                    }
+                    return@Scaffold
+                }
+                Column(
                     Modifier
                         .fillMaxSize()
                         .padding(it)
-                        .verticalScroll(
-                            rememberScrollState()
-                        )
-                )
-            }
-        }
-
-
-        is UiState.Loading -> {
-            Scaffold(topBar = {
-                TopAppBar({
-                    Text("加载中")
-                })
-            }) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                    Alignment.Center,
                 ) {
-                    LoadingIndicator()
-                }
-            }
-        }
-
-        is UiState.Success<*> -> {
-            val (dict) = dictState as UiState.Success
-            LaunchedEffect(dict) {
-                viewModel.loadDictionaryDetail(dict)
-                viewModel.loadDictionaryIsInstalled(dict)
-            }
-            val parsedResultsState by viewModel.parsedResultsState.collectAsState()
-            val installState by viewModel.installState.collectAsState()
-            val listState = rememberLazyListState()
-            Scaffold(
-                topBar = {
-                    TopAppBar({
-                        Text(dict.name.orEmpty())
-                    })
-                }
-            ) {
-                when (parsedResultsState) {
-                    UiState.Idle -> {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(it),
-                        ) {
-                            LoadingIndicator(Modifier.align(Alignment.Center))
+                    LazyColumn(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        listState
+                    ) {
+                        items(parsedResults) {
+                            ListItem(
+                                { Text(it.word) },
+                                supportingContent = { Text(it.pinyin) }
+                            )
+                            HorizontalDivider()
                         }
                     }
-
-                    is UiState.Error -> {
-                        val (exception) = parsedResultsState as UiState.Error
-                        Text(
-                            exception.stackTraceToString(),
-                            Modifier
-                                .fillMaxSize()
-                                .padding(it)
-                                .verticalScroll(
-                                    rememberScrollState()
-                                )
-                        )
-                    }
-
-                    is UiState.Loading -> {
-                        val (progress) = parsedResultsState as UiState.Loading
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(it),
-                        ) {
-                            LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
-                            LoadingIndicator(Modifier.align(Alignment.Center))
-                        }
-                    }
-
-                    is UiState.Success<*> -> {
-                        val (parsedResults) = parsedResultsState as UiState.Success<List<ParsedResult>>
-                        if (parsedResults.isEmpty()) {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(it),
-                            ) {
-                                Text("没有解析结果", Modifier.align(Alignment.Center))
-                            }
-                            return@Scaffold
-                        }
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(it)
-                        ) {
-                            LazyColumn(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                listState
-                            ) {
-                                items(parsedResults) {
-                                    ListItem(
-                                        { Text(it.word) },
-                                        supportingContent = { Text(it.pinyin) }
-                                    )
-                                    HorizontalDivider()
-                                }
-                            }
-                            when (installState) {
-                                InstallState.Uninstalling -> DictionaryDetailButton("卸载中")
-                                InstallState.Installing -> DictionaryDetailButton("安装中")
-                                InstallState.Uninstalled -> DictionaryDetailButton("安装", { viewModel.installUserDictionary(dict, parsedResults) })
-                                InstallState.Installed -> DictionaryDetailButton("卸载", { viewModel.uninstallUserDictionary(dict) })
-                                else -> null
-                            }
-                        }
+                    when (installState) {
+                        InstallState.Uninstalling -> DictionaryDetailButton("卸载中")
+                        InstallState.Installing -> DictionaryDetailButton("安装中")
+                        InstallState.Uninstalled -> DictionaryDetailButton("安装", { viewModel.installUserDictionary(dict, parsedResults) })
+                        InstallState.Installed -> DictionaryDetailButton("卸载", { viewModel.uninstallUserDictionary(dict) })
+                        else -> null
                     }
                 }
             }
         }
     }
-
-
 }
 
 @Composable
@@ -196,5 +105,4 @@ fun DictionaryDetailButton(
     ) {
         Text(text)
     }
-
 }
