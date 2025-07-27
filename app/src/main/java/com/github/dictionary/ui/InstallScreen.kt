@@ -86,8 +86,8 @@ fun InstallScreen(data: Install) {
             ) {
                 items(results) {
                     ListItem(
-                        { Text(it.word) },
-                        supportingContent = { Text(it.pinyin) }
+                        { Text(it.pinyin) },
+                        supportingContent = { Text(it.word) }
                     )
                     HorizontalDivider()
                 }
