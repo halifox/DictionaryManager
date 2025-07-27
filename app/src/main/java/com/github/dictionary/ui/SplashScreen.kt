@@ -20,7 +20,7 @@ fun SplashScreen(navController: NavHostController) {
                 }
             }
         } else {
-            navController.navigate(ImePermission) {
+            navController.navigate(PermissionCheck) {
                 popUpTo(0) {
                     inclusive = true
                 }

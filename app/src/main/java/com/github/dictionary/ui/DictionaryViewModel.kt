@@ -32,16 +32,9 @@ class DictionaryViewModel @Inject constructor(val repo: DictRepository) : ViewMo
         awaitClose {}
     }
 
-    fun getRecords() = Pager(
+    fun getInstalledDictionaries() = Pager(
         PagingConfig(pageSize = 20)
     ) {
-        repo.getRecords()
+        repo.getInstalledDictionaries()
     }.flow.cachedIn(viewModelScope)
-
-    fun getRecords2() = Pager(
-        PagingConfig(pageSize = 20)
-    ) {
-        repo.getRecords2()
-    }.flow.cachedIn(viewModelScope)
-
 }

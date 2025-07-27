@@ -8,13 +8,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
@@ -24,14 +22,12 @@ import androidx.paging.compose.collectAsLazyPagingItems
 @Composable
 fun LocalDictionaryScreen(navController: NavHostController) {
     val viewModel = hiltViewModel<DictionaryViewModel>()
-    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar({ Text("已安装的词典") })
         },
     ) {
-        val items = viewModel.getRecords2().collectAsLazyPagingItems()
+        val items = viewModel.getInstalledDictionaries().collectAsLazyPagingItems()
         LazyColumn(
             Modifier
                 .fillMaxSize()

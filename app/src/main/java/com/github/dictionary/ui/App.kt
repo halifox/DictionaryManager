@@ -14,15 +14,14 @@ fun App() {
         val navController = rememberNavController()
         NavHost(navController, Splash) {
             composable<Splash> { SplashScreen(navController) }
-            composable<ImePermission> { PermissionCheckScreen(navController) }
+            composable<PermissionCheck> { PermissionCheckScreen(navController) }
             composable<Home> { HomeScreen(navController) }
             composable<Dictionary> { DictionaryScreen(navController, it.toRoute()) }
-            composable<Install> { InstallScreen(it.toRoute()) }
+            composable<DictionaryDetail> { DictionaryDetailScreen(it.toRoute()) }
             composable<LocalDictionary> { LocalDictionaryScreen(navController) }
         }
     }
 }
-
 
 
 @Serializable
@@ -32,13 +31,14 @@ object Splash
 object Home
 
 @Serializable
-object ImePermission
+object PermissionCheck
+
+@Serializable
+object LocalDictionary
 
 @Serializable
 data class Dictionary(val source: String)
 
 @Serializable
-data class Install(val id: Int)
+data class DictionaryDetail(val id: Int)
 
-@Serializable
-object LocalDictionary

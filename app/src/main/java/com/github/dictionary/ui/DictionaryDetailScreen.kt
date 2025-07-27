@@ -32,7 +32,6 @@ import com.github.dictionary.parser.ParsedResult
 import com.github.dictionary.repository.DictRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -45,24 +44,24 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun InstallScreen(data: Install) {
-    val viewModel = hiltViewModel<InstallViewModel>()
+fun DictionaryDetailScreen(data: DictionaryDetail) {
+    val (id) = data
+    val viewModel = hiltViewModel<DictionaryDetailViewModel>()
+    LaunchedEffect(Unit) {
+        viewModel.init(id)
+    }
     val listState = rememberLazyListState()
 
     val uiState by viewModel.uiState.collectAsState()
-    LaunchedEffect(Unit) {
-        viewModel.init(data)
-    }
-
-    if (uiState is InstallScreenState.Error) {
-        val uiState = uiState as InstallScreenState.Error
+    if (uiState is DictionaryDetailState.Error) {
+        val uiState = uiState as DictionaryDetailState.Error
         return ErrorScreen(uiState.exception)
     }
-    if (uiState == InstallScreenState.Loading) {
+    if (uiState == DictionaryDetailState.Loading) {
         return LoadingIndicatorScreen()
     }
 
-    val (dict, localRecord) = uiState as InstallScreenState.Installed
+    val (dict, localRecord) = uiState as DictionaryDetailState.Installed
     val isBusy by viewModel.isBusy.collectAsState()
     val progress by viewModel.progress.collectAsState()
     val results by viewModel.results.collectAsState()
@@ -126,17 +125,17 @@ fun InstallScreen(data: Install) {
     }
 }
 
-sealed class InstallScreenState {
-    object Loading : InstallScreenState()
-    data class Error(val exception: Exception) : InstallScreenState()
-    data class Installed(val dict: Dict, val localRecord: LocalRecord?) : InstallScreenState()
+sealed class DictionaryDetailState {
+    object Loading : DictionaryDetailState()
+    data class Error(val exception: Exception) : DictionaryDetailState()
+    data class Installed(val dict: Dict, val localRecord: LocalRecord?) : DictionaryDetailState()
 }
 
 
 @HiltViewModel
-class InstallViewModel @Inject constructor(val repo: DictRepository, application: Application) : AndroidViewModel(application) {
+class DictionaryDetailViewModel @Inject constructor(val repo: DictRepository, application: Application) : AndroidViewModel(application) {
     val context = application
-    private val _uiState = MutableStateFlow<InstallScreenState>(InstallScreenState.Loading)
+    private val _uiState = MutableStateFlow<DictionaryDetailState>(DictionaryDetailState.Loading)
     val uiState = _uiState.asStateFlow()
 
     val client = OkHttpClient.Builder().build()
@@ -144,20 +143,20 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
     val results = MutableStateFlow(emptyList<ParsedResult>())
     val isBusy = MutableStateFlow(false)
 
-    fun init(data: Install) {
+    fun init(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 isBusy.value = true
-                val dict = repo.getDictionaryById(data.id)
+                val dict = repo.getDictionaryById(id)
                 val localRecord = repo.getRecordById(dict._id)
-                _uiState.value = InstallScreenState.Installed(dict, localRecord)
+                _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
                 if (localRecord == null) {
                     downloadUserDictionary(dict)
                 } else {
                     results.value = repo.queryUserDictionaryByIds(localRecord)
                 }
             } catch (e: Exception) {
-                _uiState.value = InstallScreenState.Error(e)
+                _uiState.value = DictionaryDetailState.Error(e)
                 e.printStackTrace()
             } finally {
                 isBusy.value = false
@@ -218,7 +217,7 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
             isBusy.value = true
             repo.installUserDictionary(dict, data)
             val localRecord = repo.getRecordById(dict._id)
-            _uiState.value = InstallScreenState.Installed(dict, localRecord)
+            _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
             isBusy.value = false
         }
     }
@@ -228,7 +227,7 @@ class InstallViewModel @Inject constructor(val repo: DictRepository, application
             isBusy.value = true
             repo.uninstallUserDictionary(record)
             val localRecord = repo.getRecordById(dict._id)
-            _uiState.value = InstallScreenState.Installed(dict, localRecord)
+            _uiState.value = DictionaryDetailState.Installed(dict, localRecord)
             isBusy.value = false
         }
     }
