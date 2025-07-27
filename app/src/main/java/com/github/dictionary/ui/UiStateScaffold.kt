@@ -1,5 +1,6 @@
 package com.github.dictionary.ui
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,16 +27,18 @@ fun <T> UiStateScaffold(
     when (state) {
         is UiState.Error -> {
             val (exception) = state
-            Scaffold(topBar = { TopAppBar({ Text("异常") }) }) {
-                Text(
-                    exception.stackTraceToString(),
-                    Modifier
-                        .fillMaxSize()
+            Scaffold(topBar = { TopAppBar({ Text("出现了一点异常") }) }) {
+                Box(
+                    modifier = Modifier
                         .padding(it)
-                        .verticalScroll(
-                            rememberScrollState()
-                        )
-                )
+                        .horizontalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = exception.stackTraceToString(),
+                        softWrap = false
+                    )
+                }
             }
         }
 
