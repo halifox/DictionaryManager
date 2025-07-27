@@ -8,8 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Android
+import androidx.compose.material.icons.rounded.InstallMobile
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -53,18 +57,18 @@ fun HomeScreen(navController: NavHostController) {
             ListItem(
                 { Text("已安装的词库") },
                 Modifier.clickable { navController.navigate(LocalDictionary) },
-                supportingContent = { Text("已安装的词库的管理") },
-                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
+                supportingContent = { Text("管理已安装的词库") },
+                leadingContent = { Icon(Icons.Rounded.InstallMobile, null, Modifier.size(28.dp)) },
             )
             ListItem(
-                { Text("本地词库(系统)") },
+                { Text("本地词库") },
                 Modifier.clickable {
                     val intent = Intent(Settings.ACTION_USER_DICTIONARY_SETTINGS)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                 },
-                supportingContent = { Text("本地词库的管理") },
-                leadingContent = { AsyncImage(R.raw.local, null, Modifier.size(28.dp)) },
+                supportingContent = { Text("打开系统的本地词库管理器") },
+                leadingContent = { Icon(Icons.Rounded.Android, null, Modifier.size(28.dp)) },
             )
             if (com.github.dictionary.BuildConfig.DEBUG) {
                 ListItem(
