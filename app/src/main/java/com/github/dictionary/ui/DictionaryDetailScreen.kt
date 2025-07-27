@@ -56,11 +56,15 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
             Modifier
                 .fillMaxSize()
                 .padding(it)
-
         ) {
             if (uiState is DictionaryDetailState.Downloading) {
                 val progress by viewModel.progress.collectAsState()
                 LinearWavyProgressIndicator({ progress }, Modifier.fillMaxWidth())
+            }
+            if (results.isEmpty() && uiState in listOf(DictionaryDetailState.Uninstalled, DictionaryDetailState.Installed)) {
+                ListItem({
+                    Text("当前词典目前无法解析出词条")
+                })
             }
             LazyColumn(
                 Modifier
@@ -76,6 +80,7 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
                     HorizontalDivider()
                 }
             }
+
             when (uiState) {
                 DictionaryDetailState.UnInstalling -> DictionaryDetailButton("卸载中")
                 DictionaryDetailState.Installing -> DictionaryDetailButton("安装中")
@@ -84,7 +89,9 @@ fun DictionaryDetailScreen(data: DictionaryDetail) {
                 DictionaryDetailState.Downloading -> DictionaryDetailButton("下载中")
                 else -> null
             }
+
         }
+
     }
 }
 
