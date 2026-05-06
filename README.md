@@ -1,4 +1,4 @@
-# dict
+# PureDict
 
 A new Flutter project.
 

@@ -1,4 +1,4 @@
-package com.halifox.dict
+package com.halifox.puredict
 
 import io.flutter.embedding.android.FlutterActivity
 

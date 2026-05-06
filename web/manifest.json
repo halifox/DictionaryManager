@@ -1,6 +1,6 @@
 {
-    "name": "dict",
-    "short_name": "dict",
+    "name": "PureDict",
+    "short_name": "PureDict",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
