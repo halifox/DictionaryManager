@@ -9,55 +9,71 @@ part of 'dictionary_installer_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(DictionaryInstaller)
-final dictionaryInstallerProvider = DictionaryInstallerProvider._();
+@ProviderFor(startInstallation)
+final startInstallationProvider = StartInstallationFamily._();
 
-final class DictionaryInstallerProvider
-    extends $NotifierProvider<DictionaryInstaller, InstallState> {
-  DictionaryInstallerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'dictionaryInstallerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+final class StartInstallationProvider
+    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
+    with $FutureModifier<void>, $FutureProvider<void> {
+  StartInstallationProvider._({
+    required StartInstallationFamily super.from,
+    required List<TableEntry> super.argument,
+  }) : super(
+         retry: null,
+         name: r'startInstallationProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
-  String debugGetCreateSourceHash() => _$dictionaryInstallerHash();
+  String debugGetCreateSourceHash() => _$startInstallationHash();
+
+  @override
+  String toString() {
+    return r'startInstallationProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
-  DictionaryInstaller create() => DictionaryInstaller();
+  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(InstallState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<InstallState>(value),
-    );
+  @override
+  FutureOr<void> create(Ref ref) {
+    final argument = this.argument as List<TableEntry>;
+    return startInstallation(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is StartInstallationProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-String _$dictionaryInstallerHash() =>
-    r'5c86b7412b4fe5b7ddac9fd508ef8f10dab0a1c6';
+String _$startInstallationHash() => r'f6181ab12ae046f148fc474fc478a2ae680f5ba2';
 
-abstract class _$DictionaryInstaller extends $Notifier<InstallState> {
-  InstallState build();
-  @$mustCallSuper
+final class StartInstallationFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<void>, List<TableEntry>> {
+  StartInstallationFamily._()
+    : super(
+        retry: null,
+        name: r'startInstallationProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  StartInstallationProvider call(List<TableEntry> words) =>
+      StartInstallationProvider._(argument: words, from: this);
+
   @override
-  void runBuild() {
-    final ref = this.ref as $Ref<InstallState, InstallState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<InstallState, InstallState>,
-              InstallState,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
-  }
+  String toString() => r'startInstallationProvider';
 }

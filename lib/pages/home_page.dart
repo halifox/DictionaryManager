@@ -31,7 +31,6 @@ class HomePage extends StatelessWidget {
               );
             },
           ),
-          const Divider(height: 1),
           ListTile(
             leading: Icon(
               Icons.person_outline,
