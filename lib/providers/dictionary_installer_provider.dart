@@ -6,6 +6,9 @@ import '../services/native_service.dart';
 part 'dictionary_installer_provider.g.dart';
 
 @riverpod
-Future<void> startInstallation(Ref ref, List<TableEntry> words) async {
-  return await NativeService.insertBatch(words);
+Future<List<int>> startInstallation(
+  Ref ref,
+  List<TableEntry> words,
+) {
+  return NativeService.insertBatch(words);
 }

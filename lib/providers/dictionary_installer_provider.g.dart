@@ -13,8 +13,13 @@ part of 'dictionary_installer_provider.dart';
 final startInstallationProvider = StartInstallationFamily._();
 
 final class StartInstallationProvider
-    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
-    with $FutureModifier<void>, $FutureProvider<void> {
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<int>>,
+          List<int>,
+          FutureOr<List<int>>
+        >
+    with $FutureModifier<List<int>>, $FutureProvider<List<int>> {
   StartInstallationProvider._({
     required StartInstallationFamily super.from,
     required List<TableEntry> super.argument,
@@ -38,11 +43,11 @@ final class StartInstallationProvider
 
   @$internal
   @override
-  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
+  $FutureProviderElement<List<int>> $createElement($ProviderPointer pointer) =>
       $FutureProviderElement(pointer);
 
   @override
-  FutureOr<void> create(Ref ref) {
+  FutureOr<List<int>> create(Ref ref) {
     final argument = this.argument as List<TableEntry>;
     return startInstallation(ref, argument);
   }
@@ -58,10 +63,10 @@ final class StartInstallationProvider
   }
 }
 
-String _$startInstallationHash() => r'f6181ab12ae046f148fc474fc478a2ae680f5ba2';
+String _$startInstallationHash() => r'975767ae85b0d0a96348faa4b5bf4ccdf0bc60c2';
 
 final class StartInstallationFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<void>, List<TableEntry>> {
+    with $FunctionalFamilyOverride<FutureOr<List<int>>, List<TableEntry>> {
   StartInstallationFamily._()
     : super(
         retry: null,

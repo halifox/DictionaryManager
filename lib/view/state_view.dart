@@ -91,7 +91,7 @@ class StateView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(28),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerLow,
                 shape: BoxShape.circle,
@@ -108,7 +108,7 @@ class StateView extends StatelessWidget {
                   color: colorScheme.onSurface,
                 ),
               ),
-            if (title.isNotEmpty) const SizedBox(height: 12),
+            if (title.isNotEmpty) const SizedBox(height: 16),
             if (message.isNotEmpty)
               Text(
                 message,
@@ -117,7 +117,7 @@ class StateView extends StatelessWidget {
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
             if (onAction != null && actionLabel != null)
               FilledButton.icon(
                 onPressed: onAction,
@@ -126,7 +126,7 @@ class StateView extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
-                    vertical: 12,
+                    vertical: 16,
                   ),
                 ),
               ),

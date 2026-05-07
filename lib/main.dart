@@ -36,10 +36,16 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: lightColorScheme,
             useMaterial3: true,
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+            ),
           ),
           darkTheme: ThemeData(
             colorScheme: darkColorScheme,
             useMaterial3: true,
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+            ),
           ),
           home: const HomePage(),
         );

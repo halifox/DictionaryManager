@@ -39,6 +39,14 @@ dependencies:
   riverpod_annotation: ^4.0.2
   dynamic_color: ^1.7.0
   permission_handler: ^11.3.1
+  http: ^1.2.2
+  path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
+  collection: ^1.19.1
+  archive: ^3.6.1
+  gbk_codec: ^0.4.0
+  path: ^1.9.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

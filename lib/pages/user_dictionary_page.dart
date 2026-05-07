@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:puredict/view/state_view.dart';
 
@@ -11,10 +12,12 @@ class UserDictionaryPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userDictState = ref.watch(loadUserDictionaryProvider);
+    final searchController = useTextEditingController();
+    final searchQuery = useState('');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('用户词库'),
-        centerTitle: true,
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) async {
@@ -56,7 +59,16 @@ class UserDictionaryPage extends HookConsumerWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'clear', child: Text('清空词库')),
+              const PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline),
+                    SizedBox(width: 12),
+                    Text('清空词库'),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -66,22 +78,70 @@ class UserDictionaryPage extends HookConsumerWidget {
           if (words.isEmpty) {
             return StateView.empty();
           }
-          return ListView.builder(
-            itemCount: words.length,
-            itemBuilder: (context, index) {
-              final word = words[index];
-              return ListTile(
-                leading: Icon(
-                  Icons.text_fields,
-                  color: Theme.of(context).colorScheme.primary,
+
+          final filteredWords = searchQuery.value.isEmpty
+              ? words
+              : words.where((word) {
+                  final query = searchQuery.value.toLowerCase();
+                  final wordText = word.word.toLowerCase();
+                  final shortcut = (word.shortcut ?? '').toLowerCase();
+                  return wordText.contains(query) || shortcut.contains(query);
+                }).toList();
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: '搜索词语或拼音',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: searchQuery.value.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              searchQuery.value = '';
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    searchQuery.value = value;
+                  },
                 ),
-                title: Text(
-                  word.word,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text(word.shortcut ?? ""),
-              );
-            },
+              ),
+              Expanded(
+                child: filteredWords.isEmpty
+                    ? Center(
+                        child: Text(
+                          '未找到匹配结果',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredWords.length,
+                        itemBuilder: (context, index) {
+                          final word = filteredWords[index];
+                          return ListTile(
+                            leading: Icon(
+                              Icons.text_fields,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: Text(
+                              word.word,
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(word.shortcut ?? ""),
+                          );
+                        },
+                      ),
+              ),
+            ],
           );
         },
         error: (error, stackTrace) {

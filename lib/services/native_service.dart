@@ -42,10 +42,11 @@ class NativeService {
     }
   }
 
-  static Future<void> insertBatch(List<TableEntry> chunk) async {
+  static Future<List<int>> insertBatch(List<TableEntry> list) async {
     try {
-      final words = chunk.map((entry) => entry.toMap()).toList();
-      await _channel.invokeMethod('insertBatch', {'words': words});
+      final words = list.map((entry) => entry.toMap()).toList();
+      final result = await _channel.invokeMethod('insertBatch', {'words': words});
+      return (result as List).cast<int>();
     } on PlatformException catch (e) {
       throw Exception('批量插入失败: ${e.message}');
     }
@@ -56,6 +57,15 @@ class NativeService {
       await _channel.invokeMethod('clearUserDictionary');
     } on PlatformException catch (e) {
       throw Exception('清空用户词库失败: ${e.message}');
+    }
+  }
+
+  static Future<int> deleteWordsByIds(List<int> ids) async {
+    try {
+      final result = await _channel.invokeMethod('deleteWordsByIds', {'ids': ids});
+      return result as int;
+    } on PlatformException catch (e) {
+      throw Exception('删除词条失败: ${e.message}');
     }
   }
 }

@@ -20,7 +20,6 @@ class PermissionRequestPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('需要权限'),
-        centerTitle: true,
       ),
       body: Center(
         child: Padding(
@@ -77,7 +76,7 @@ class PermissionRequestPage extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
-                    vertical: 20,
+                    vertical: 16,
                   ),
                 ),
               ),

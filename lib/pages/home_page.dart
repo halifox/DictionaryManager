@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../models/ime_format.dart';
+import 'file_import_page.dart';
+import 'installed_dictionaries_page.dart';
 import 'pyim_dictionary_page.dart';
 import 'user_dictionary_page.dart';
 
@@ -9,46 +13,82 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('词典管理器'),
-        centerTitle: true,
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.library_books_outlined,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('Pyim 词库管理'),
-            subtitle: const Text('管理和导入 Pyim 词库'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PyimDictionaryPage(),
-                ),
-              );
+        title: const Text('PureDict'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'installed') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const InstalledDictionariesPage(),
+                  ),
+                );
+              } else if (value == 'user') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserDictionaryPage(),
+                  ),
+                );
+              }
             },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.person_outline,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('用户词典'),
-            subtitle: const Text('查看已安装的用户词典'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const UserDictionaryPage(),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'installed',
+                child: Row(
+                  children: [
+                    Icon(Icons.download_done_outlined),
+                    SizedBox(width: 12),
+                    Text('已安装词典'),
+                  ],
                 ),
-              );
-            },
+              ),
+              const PopupMenuItem(
+                value: 'user',
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline),
+                    SizedBox(width: 12),
+                    Text('用户词库'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+      body: ListView.builder(
+        itemCount: ImeFormatInfo.allFormats.length,
+        itemBuilder: (context, index) {
+          final formatInfo = ImeFormatInfo.allFormats[index];
+          return ListTile(
+            leading: Icon(
+              formatInfo.icon,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Text(formatInfo.displayName),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              if (formatInfo.format == ImeFormat.pyimTable) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PyimDictionaryPage(),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        FileImportPage(formatInfo: formatInfo),
+                  ),
+                );
+              }
+            },
+          );
+        },
       ),
     );
   }

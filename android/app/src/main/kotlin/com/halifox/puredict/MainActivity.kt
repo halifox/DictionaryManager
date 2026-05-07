@@ -1,6 +1,8 @@
 package com.halifox.puredict
 
 import android.content.ComponentName
+import android.content.ContentProviderOperation
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -29,8 +31,8 @@ class MainActivity : FlutterActivity() {
                             if (words == null) {
                                 result.error("INVALID_ARGUMENT", "words is null", null)
                             } else {
-                                val count = insertBatch(words)
-                                result.success(count)
+                                val ids = insertBatch(words)
+                                result.success(ids)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -55,6 +57,21 @@ class MainActivity : FlutterActivity() {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             result.error("CLEAR_ERROR", e.message, null)
+                        }
+                    }
+
+                    "deleteWordsByIds" -> {
+                        try {
+                            val ids = call.argument<List<Long>>("ids")
+                            if (ids == null) {
+                                result.error("INVALID_ARGUMENT", "ids is null", null)
+                            } else {
+                                val count = deleteWordsByIds(ids)
+                                result.success(count)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            result.error("DELETE_ERROR", e.message, null)
                         }
                     }
 
@@ -136,18 +153,31 @@ class MainActivity : FlutterActivity() {
         return words
     }
 
-    private fun insertBatch(words: List<Map<String, Any>>): Int {
-        val values = Array(words.size) { index ->
-            val entry = words[index]
-            ContentValues(5).apply {
-                put(UserDictionary.Words.WORD, entry["word"] as String)
-                put(UserDictionary.Words.FREQUENCY, entry["frequency"] as Int?)
-                put(UserDictionary.Words.LOCALE, entry["locale"] as String?)
-                put(UserDictionary.Words.APP_ID, entry["appid"] as Int?)
-                put(UserDictionary.Words.SHORTCUT, entry["shortcut"] as String?)
+    private fun insertBatch(words: List<Map<String, Any>>): List<Long> {
+        val allIds = mutableListOf<Long>()
+        val chunkSize = 100
+
+        words.chunked(chunkSize).forEach { chunk ->
+            val operations = ArrayList<ContentProviderOperation>()
+            chunk.forEach { entry ->
+                operations.add(
+                    ContentProviderOperation.newInsert(UserDictionary.Words.CONTENT_URI)
+                        .withValue(UserDictionary.Words.WORD, entry["word"] as String)
+                        .withValue(UserDictionary.Words.FREQUENCY, entry["frequency"] as Int?)
+                        .withValue(UserDictionary.Words.LOCALE, entry["locale"] as String?)
+                        .withValue(UserDictionary.Words.APP_ID, entry["appid"] as Int?)
+                        .withValue(UserDictionary.Words.SHORTCUT, entry["shortcut"] as String?)
+                        .build()
+                )
+            }
+
+            val results = applicationContext.contentResolver.applyBatch(UserDictionary.AUTHORITY, operations)
+            results.mapNotNullTo(allIds) { result ->
+                result.uri?.let { ContentUris.parseId(it) }
             }
         }
-        return applicationContext.contentResolver.bulkInsert(UserDictionary.Words.CONTENT_URI, values)
+
+        return allIds
     }
 
     private fun clearUserDictionary(): Int {
@@ -156,5 +186,14 @@ class MainActivity : FlutterActivity() {
             null,
             null
         )
+    }
+
+    private fun deleteWordsByIds(ids: List<Long>): Int {
+        var deletedCount = 0
+        ids.forEach { id ->
+            val uri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI, id)
+            deletedCount += applicationContext.contentResolver.delete(uri, null, null)
+        }
+        return deletedCount
     }
 }
