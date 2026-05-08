@@ -1,11 +1,12 @@
 import 'package:puredict/models/table_entry.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../services/native_service.dart';
+import '../generated/dictionary_api.g.dart';
 
 part 'user_dictionary_provider.g.dart';
 
 @riverpod
-Future<List<TableEntry>> loadUserDictionary(Ref ref) async {
-  return await NativeService.queryUserDictionary();
+Future<List<TableEntryData>> loadUserDictionary(Ref ref) async {
+  final api = DictionaryApi();
+  return await api.queryWords();
 }

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -22,12 +22,12 @@ class ZiguangUwlParser extends BinaryParser {
   ];
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
     final reader = BinaryReader(bytes);
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     reader.position = 0x02;
     final enc = reader.readByte();
@@ -56,8 +56,8 @@ class ZiguangUwlParser extends BinaryParser {
     return entries;
   }
 
-  List<TableEntry> _parseSegment(BinaryReader reader, bool isUnicode) {
-    final entries = <TableEntry>[];
+  List<TableEntryData> _parseSegment(BinaryReader reader, bool isUnicode) {
+    final entries = <TableEntryData>[];
 
     reader.readInt32(); // index number
     reader.readInt32(); // ff
@@ -82,7 +82,7 @@ class ZiguangUwlParser extends BinaryParser {
     return entries;
   }
 
-  TableEntry? _parseWord(BinaryReader reader, bool isUnicode) {
+  TableEntryData? _parseWord(BinaryReader reader, bool isUnicode) {
     int lenWord = reader.readByte();
     int lenCode = reader.readByte();
 
@@ -113,7 +113,7 @@ class ZiguangUwlParser extends BinaryParser {
       return null;
     }
 
-    return TableEntry(
+    return TableEntryData(
       word: word,
       shortcut: pinyinList.join("'"),
       frequency: rank,

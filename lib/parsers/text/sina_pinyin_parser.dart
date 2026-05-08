@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../base/text_parser.dart';
 
@@ -13,11 +13,11 @@ class SinaPinyinParser extends TextParser {
   Encoding get encoding => EncodingHelper.gbk;
 
   @override
-  Future<List<TableEntry>> parseText(
+  Future<List<TableEntryData>> parseText(
     String content, {
     void Function(ParseProgress)? onProgress,
   }) async {
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
     final lines = content.split('\n');
 
     for (int i = 0; i < lines.length; i++) {
@@ -44,14 +44,14 @@ class SinaPinyinParser extends TextParser {
   }
 
   @override
-  TableEntry? parseLine(String line) {
+  TableEntryData? parseLine(String line) {
     final parts = line.split(' ');
     if (parts.length < 2) return null;
 
     final pinyin = parts[0].replaceAll("'", "");
     final word = parts[1];
 
-    return TableEntry(
+    return TableEntryData(
       word: word,
       shortcut: pinyin,
       frequency: 1,

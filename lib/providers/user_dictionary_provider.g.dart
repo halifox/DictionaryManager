@@ -15,11 +15,13 @@ final loadUserDictionaryProvider = LoadUserDictionaryProvider._();
 final class LoadUserDictionaryProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<TableEntry>>,
-          List<TableEntry>,
-          FutureOr<List<TableEntry>>
+          AsyncValue<List<TableEntryData>>,
+          List<TableEntryData>,
+          FutureOr<List<TableEntryData>>
         >
-    with $FutureModifier<List<TableEntry>>, $FutureProvider<List<TableEntry>> {
+    with
+        $FutureModifier<List<TableEntryData>>,
+        $FutureProvider<List<TableEntryData>> {
   LoadUserDictionaryProvider._()
     : super(
         from: null,
@@ -36,15 +38,15 @@ final class LoadUserDictionaryProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<TableEntry>> $createElement(
+  $FutureProviderElement<List<TableEntryData>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<TableEntry>> create(Ref ref) {
+  FutureOr<List<TableEntryData>> create(Ref ref) {
     return loadUserDictionary(ref);
   }
 }
 
 String _$loadUserDictionaryHash() =>
-    r'676e3e6736a0f701861779db1cf2689f6fee8959';
+    r'7be95c837cd68e1a0eb98e16a75495d8cb3a3fb5';

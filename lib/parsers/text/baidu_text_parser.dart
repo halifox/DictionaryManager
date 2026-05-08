@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../base/text_parser.dart';
 
 class BaiduTextParser extends TextParser {
@@ -12,11 +12,11 @@ class BaiduTextParser extends TextParser {
   Encoding get encoding => utf8;
 
   @override
-  Future<List<TableEntry>> parseText(
+  Future<List<TableEntryData>> parseText(
     String content, {
     void Function(ParseProgress)? onProgress,
   }) async {
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
     final lines = content.split('\n');
 
     for (int i = 0; i < lines.length; i++) {
@@ -43,7 +43,7 @@ class BaiduTextParser extends TextParser {
   }
 
   @override
-  TableEntry? parseLine(String line) {
+  TableEntryData? parseLine(String line) {
     final parts = line.split('\t');
     if (parts.isEmpty) return null;
 
@@ -51,7 +51,7 @@ class BaiduTextParser extends TextParser {
 
     if (parts.length == 2) {
       final frequency = int.tryParse(parts[1]) ?? 1;
-      return TableEntry(
+      return TableEntryData(
         word: word,
         shortcut: null,
         frequency: frequency,
@@ -60,7 +60,7 @@ class BaiduTextParser extends TextParser {
     } else if (parts.length >= 3) {
       final pinyin = parts[1].replaceAll("'", "");
       final frequency = int.tryParse(parts[2]) ?? 1;
-      return TableEntry(
+      return TableEntryData(
         word: word,
         shortcut: pinyin,
         frequency: frequency,

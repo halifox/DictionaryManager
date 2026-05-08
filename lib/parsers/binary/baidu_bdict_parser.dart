@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -23,12 +23,12 @@ class BaiduBdictParser extends BinaryParser {
   BaiduBdictParser() : super(ImeFormat.baiduBdict);
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
     final reader = BinaryReader(bytes);
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     reader.position = 0x60;
     final endPosition = reader.readInt32();
@@ -61,7 +61,7 @@ class BaiduBdictParser extends BinaryParser {
     return entries;
   }
 
-  TableEntry? _parseWord(BinaryReader reader) {
+  TableEntryData? _parseWord(BinaryReader reader) {
     final length = reader.readInt32();
 
     if (length == 0 || length > 1000 || reader.position + length * 4 > reader.length) {
@@ -88,7 +88,7 @@ class BaiduBdictParser extends BinaryParser {
     final wordBytes = reader.readBytes(length * 2);
     final word = EncodingHelper.utf16le.decode(wordBytes);
 
-    return TableEntry(
+    return TableEntryData(
       word: word,
       shortcut: pinyinList.join("'"),
       frequency: 1,

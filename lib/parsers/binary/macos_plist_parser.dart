@@ -3,7 +3,7 @@ import 'dart:io';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../base/base_parser.dart';
 
 class MacOsPlistParser extends BaseParser {
@@ -15,7 +15,7 @@ class MacOsPlistParser extends BaseParser {
     void Function(ParseProgress)? onProgress,
   }) async {
     final stopwatch = Stopwatch()..start();
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     // 读取文件内容
     final file = File(filePath);
@@ -37,7 +37,7 @@ class MacOsPlistParser extends BaseParser {
       final shortcut = match.group(2) ?? '';
 
       if (word.isNotEmpty && shortcut.isNotEmpty) {
-        entries.add(TableEntry(
+        entries.add(TableEntryData(
           word: word,
           shortcut: shortcut,
           frequency: 1,

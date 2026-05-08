@@ -5,7 +5,7 @@ import 'package:archive/archive.dart';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -14,7 +14,7 @@ class QQQpydParser extends BinaryParser {
   QQQpydParser() : super(ImeFormat.qqQpyd);
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
@@ -42,12 +42,12 @@ class QQQpydParser extends BinaryParser {
     return Uint8List.fromList(inflater.decodeBytes(compressed));
   }
 
-  List<TableEntry> _parseDecompressedData(
+  List<TableEntryData> _parseDecompressedData(
     Uint8List data,
     int wordCount,
     void Function(ParseProgress)? onProgress,
   ) {
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
     int idx = 0;
     int unzippedDictStartAddr = -1;
     int count = 0;
@@ -83,7 +83,7 @@ class QQQpydParser extends BinaryParser {
       );
       final word = EncodingHelper.utf16le.decode(wordBytes);
 
-      entries.add(TableEntry(
+      entries.add(TableEntryData(
         word: word,
         shortcut: pinyin,
         frequency: 1,

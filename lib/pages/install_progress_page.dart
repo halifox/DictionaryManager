@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/installed_dictionary.dart';
-import '../models/table_entry.dart';
+import '../generated/dictionary_api.g.dart';
 import '../providers/dictionary_installer_provider.dart';
 import '../providers/installed_dictionaries_provider.dart';
 import '../services/dictionary_storage.dart';
@@ -18,7 +18,7 @@ class InstallProgressPage extends HookConsumerWidget {
     super.key,
   });
 
-  final List<TableEntry> words;
+  final List<TableEntryData> words;
   final String dictionaryName;
   final String category;
   final String source;

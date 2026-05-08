@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -11,12 +11,12 @@ class QqQcelParser extends BinaryParser {
   QqQcelParser() : super(ImeFormat.qqQcel);
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
     final reader = BinaryReader(bytes);
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     // QQ拼音 .qcel 格式与 .qpyd 类似，但有细微差异
     // 文件头部结构
@@ -55,8 +55,8 @@ class QqQcelParser extends BinaryParser {
     return entries;
   }
 
-  List<TableEntry> _readWordGroup(BinaryReader reader) {
-    final entries = <TableEntry>[];
+  List<TableEntryData> _readWordGroup(BinaryReader reader) {
+    final entries = <TableEntryData>[];
 
     final samePinyinCount = reader.readInt16();
     final pinyinLength = reader.readInt16();
@@ -72,7 +72,7 @@ class QqQcelParser extends BinaryParser {
 
       reader.skip(12); // 跳过扩展信息
 
-      entries.add(TableEntry(
+      entries.add(TableEntryData(
         word: word,
         shortcut: pinyin,
         frequency: 1,

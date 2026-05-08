@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../generated/dictionary_api.g.dart';
 import '../models/installed_dictionary.dart';
 import '../services/dictionary_storage.dart';
-import '../services/native_service.dart';
 
 part 'installed_dictionaries_provider.g.dart';
 
@@ -23,7 +23,8 @@ class InstalledDictionaries extends _$InstalledDictionaries {
     final dictionary = await DictionaryStorage.getDictionary(name);
     if (dictionary == null) return;
 
-    await NativeService.deleteWordsByIds(dictionary.wordIds);
+    final api = DictionaryApi();
+    await api.removeWords(dictionary.wordIds);
     await DictionaryStorage.removeDictionary(name);
     await refresh();
   }
@@ -33,4 +34,3 @@ class InstalledDictionaries extends _$InstalledDictionaries {
 Future<bool> isDictionaryInstalled(Ref ref, String name) async {
   return await DictionaryStorage.isDictionaryInstalled(name);
 }
-

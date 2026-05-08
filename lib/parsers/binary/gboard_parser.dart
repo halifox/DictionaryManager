@@ -4,7 +4,7 @@ import 'package:archive/archive.dart';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../base/base_parser.dart';
 
 class GboardParser extends BaseParser {
@@ -16,7 +16,7 @@ class GboardParser extends BaseParser {
     void Function(ParseProgress)? onProgress,
   }) async {
     final stopwatch = Stopwatch()..start();
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     // 读取 ZIP 文件
     final file = File(filePath);
@@ -50,7 +50,7 @@ class GboardParser extends BaseParser {
           final pinyin = parts[0];
           final word = parts[1];
 
-          entries.add(TableEntry(
+          entries.add(TableEntryData(
             word: word,
             shortcut: pinyin,
             frequency: 1,

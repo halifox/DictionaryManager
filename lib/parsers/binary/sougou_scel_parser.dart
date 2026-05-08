@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -11,12 +11,12 @@ class SougouScelParser extends BinaryParser {
   SougouScelParser() : super(ImeFormat.sougouScel);
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
     final reader = BinaryReader(bytes);
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     final pinyinMap = _readPinyinTable(reader);
 
@@ -71,11 +71,11 @@ class SougouScelParser extends BinaryParser {
     return pinyinMap;
   }
 
-  List<TableEntry> _readWordGroup(
+  List<TableEntryData> _readWordGroup(
     BinaryReader reader,
     Map<int, String> pinyinMap,
   ) {
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     final samePinyinCount = reader.readInt16();
     final pinyinLength = reader.readInt16();
@@ -98,7 +98,7 @@ class SougouScelParser extends BinaryParser {
 
       reader.skip(12);
 
-      entries.add(TableEntry(
+      entries.add(TableEntryData(
         word: word,
         shortcut: pinyin,
         frequency: 1,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../generated/dictionary_api.g.dart';
 import '../providers/installed_dictionaries_provider.dart';
-import '../services/native_service.dart';
 import 'dictionary_preview_page.dart';
 
 class InstalledDictionariesPage extends HookConsumerWidget {
@@ -107,7 +107,10 @@ class InstalledDictionariesPage extends HookConsumerWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DictionaryPreviewPage(
-                          loadData: () => NativeService.queryWordsByIds(dict.wordIds),
+                          loadData: () async {
+                            final api = DictionaryApi();
+                            return await api.findWords(dict.wordIds);
+                          },
                           dictionaryName: dict.name,
                           category: dict.category,
                           source: dict.source,

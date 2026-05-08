@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
@@ -11,12 +11,12 @@ class Win10MicrosoftWubiParser extends BinaryParser {
   Win10MicrosoftWubiParser() : super(ImeFormat.win10MicrosoftWubi);
 
   @override
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   }) async {
     final reader = BinaryReader(bytes);
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
 
     // 验证文件头
     reader.position = 0;
@@ -66,7 +66,7 @@ class Win10MicrosoftWubiParser extends BinaryParser {
     return entries;
   }
 
-  TableEntry? _readOnePhrase(BinaryReader reader, int nextStartPosition) {
+  TableEntryData? _readOnePhrase(BinaryReader reader, int nextStartPosition) {
     final magic = reader.readInt32();
     final hanziOffset = reader.readInt16();
     final rank = reader.readByte();
@@ -95,7 +95,7 @@ class Win10MicrosoftWubiParser extends BinaryParser {
       return null;
     }
 
-    return TableEntry(
+    return TableEntryData(
       word: word,
       shortcut: wubiStr,
       frequency: rank,

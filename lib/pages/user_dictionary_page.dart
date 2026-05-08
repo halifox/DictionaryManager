@@ -3,8 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:puredict/view/state_view.dart';
 
+import '../generated/dictionary_api.g.dart';
 import '../providers/user_dictionary_provider.dart';
-import '../services/native_service.dart';
+import 'user_dictionary_edit_page.dart';
 
 class UserDictionaryPage extends HookConsumerWidget {
   const UserDictionaryPage({super.key});
@@ -20,6 +21,18 @@ class UserDictionaryPage extends HookConsumerWidget {
       appBar: AppBar(
         title: const Text('用户词库'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserDictionaryEditPage(),
+                ),
+              );
+            },
+            tooltip: '添加词条',
+          ),
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == 'clear') {
@@ -42,7 +55,8 @@ class UserDictionaryPage extends HookConsumerWidget {
                 );
                 if (confirmed == true) {
                   try {
-                    await NativeService.clearUserDictionary();
+                    final api = DictionaryApi();
+                    await api.clearDictionary();
                     ref.invalidate(loadUserDictionaryProvider);
                     if (context.mounted) {
                       ScaffoldMessenger.of(
@@ -157,6 +171,14 @@ class UserDictionaryPage extends HookConsumerWidget {
                                 ),
                               ),
                               subtitle: Text(word.shortcut ?? ""),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => UserDictionaryEditPage(entry: word),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },

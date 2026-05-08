@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import 'base_parser.dart';
 
 abstract class BinaryParser extends BaseParser {
@@ -28,7 +28,7 @@ abstract class BinaryParser extends BaseParser {
     );
   }
 
-  Future<List<TableEntry>> parseBinary(
+  Future<List<TableEntryData>> parseBinary(
     Uint8List bytes, {
     void Function(ParseProgress)? onProgress,
   });

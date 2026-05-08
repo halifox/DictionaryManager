@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/native_service.dart';
+import '../generated/dictionary_api.g.dart';
 
 class ImeRequiredPage extends StatelessWidget {
   const ImeRequiredPage({super.key});
@@ -76,7 +76,8 @@ class ImeRequiredPage extends StatelessWidget {
               const SizedBox(height: 48),
               FilledButton.icon(
                 onPressed: () async {
-                  await NativeService.openImeSettings();
+                  final api = DictionaryApi();
+                  await api.openImeSettings();
                 },
                 icon: const Icon(Icons.settings_outlined),
                 label: const Text('去设置'),

@@ -38,7 +38,7 @@ final class InstalledDictionariesProvider
 }
 
 String _$installedDictionariesHash() =>
-    r'f24b9f9ce20b3166a8a3236e2b61f14f0d5f33a5';
+    r'3e666d0683349c9220efa82860da2df876ef7297';
 
 abstract class _$InstalledDictionaries
     extends $AsyncNotifier<List<InstalledDictionary>> {

@@ -3,10 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:puredict/view/state_view.dart';
 
-import '../models/table_entry.dart';
+import '../generated/dictionary_api.g.dart';
+import '../generated/dictionary_api.g.dart';
 import '../providers/installed_dictionaries_provider.dart';
 import '../services/dictionary_storage.dart';
-import '../services/native_service.dart';
 import 'ime_required_page.dart';
 import 'install_progress_page.dart';
 import 'uninstall_progress_page.dart';
@@ -20,7 +20,7 @@ class DictionaryPreviewPage extends HookConsumerWidget {
     super.key,
   });
 
-  final Future<List<TableEntry>> Function() loadData;
+  final Future<List<TableEntryData>> Function() loadData;
   final String dictionaryName;
   final String category;
   final String source;
@@ -30,7 +30,7 @@ class DictionaryPreviewPage extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isInstalledAsync = ref.watch(isDictionaryInstalledProvider(dictionaryName));
 
-    final loadedWords = useState<List<TableEntry>?>(null);
+    final loadedWords = useState<List<TableEntryData>?>(null);
     final isLoading = useState(true);
     final error = useState<String?>(null);
 
@@ -148,7 +148,8 @@ class DictionaryPreviewPage extends HookConsumerWidget {
                   icon: const Icon(Icons.download),
                   label: const Text('安装'),
                   onPressed: () async {
-                    final isEnabled = await NativeService.isImeEnabled();
+                    final api = DictionaryApi();
+                    final isEnabled = await api.checkImeStatus();
                     if (!isEnabled) {
                       if (context.mounted) {
                         Navigator.push(
@@ -188,7 +189,8 @@ class DictionaryPreviewPage extends HookConsumerWidget {
                 icon: const Icon(Icons.download),
                 label: const Text('安装'),
                 onPressed: () async {
-                  final isEnabled = await NativeService.isImeEnabled();
+                  final api = DictionaryApi();
+                  final isEnabled = await api.checkImeStatus();
                   if (!isEnabled) {
                     if (context.mounted) {
                       Navigator.push(

@@ -22,7 +22,7 @@ final class StartInstallationProvider
     with $FutureModifier<List<int>>, $FutureProvider<List<int>> {
   StartInstallationProvider._({
     required StartInstallationFamily super.from,
-    required List<TableEntry> super.argument,
+    required List<TableEntryData> super.argument,
   }) : super(
          retry: null,
          name: r'startInstallationProvider',
@@ -48,7 +48,7 @@ final class StartInstallationProvider
 
   @override
   FutureOr<List<int>> create(Ref ref) {
-    final argument = this.argument as List<TableEntry>;
+    final argument = this.argument as List<TableEntryData>;
     return startInstallation(ref, argument);
   }
 
@@ -63,10 +63,10 @@ final class StartInstallationProvider
   }
 }
 
-String _$startInstallationHash() => r'975767ae85b0d0a96348faa4b5bf4ccdf0bc60c2';
+String _$startInstallationHash() => r'044db0e66d86b7c86c6d8bd3abdbbce14cb6c87d';
 
 final class StartInstallationFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<List<int>>, List<TableEntry>> {
+    with $FunctionalFamilyOverride<FutureOr<List<int>>, List<TableEntryData>> {
   StartInstallationFamily._()
     : super(
         retry: null,
@@ -76,7 +76,7 @@ final class StartInstallationFamily extends $Family
         isAutoDispose: true,
       );
 
-  StartInstallationProvider call(List<TableEntry> words) =>
+  StartInstallationProvider call(List<TableEntryData> words) =>
       StartInstallationProvider._(argument: words, from: this);
 
   @override

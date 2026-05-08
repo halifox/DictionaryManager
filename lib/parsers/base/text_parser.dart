@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import 'base_parser.dart';
 
 abstract class TextParser extends BaseParser {
@@ -30,10 +30,10 @@ abstract class TextParser extends BaseParser {
     );
   }
 
-  Future<List<TableEntry>> parseText(
+  Future<List<TableEntryData>> parseText(
     String content, {
     void Function(ParseProgress)? onProgress,
   });
 
-  TableEntry? parseLine(String line);
+  TableEntryData? parseLine(String line);
 }

@@ -1,8 +1,8 @@
 import 'ime_format.dart';
-import 'table_entry.dart';
+import '../generated/dictionary_api.g.dart';
 
 class ParseResult {
-  final List<TableEntry> entries;
+  final List<TableEntryData> entries;
   final ImeFormat format;
   final int totalCount;
   final Duration parseTime;

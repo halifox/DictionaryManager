@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../generated/dictionary_api.g.dart';
 import '../models/installed_dictionary.dart';
 import '../providers/installed_dictionaries_provider.dart';
 import '../services/dictionary_storage.dart';
-import '../services/native_service.dart';
 import '../view/state_view.dart';
 
 part 'uninstall_progress_page.g.dart';
 
 @riverpod
 Future<void> uninstallDictionary(Ref ref, InstalledDictionary dictionary) async {
-  await NativeService.deleteWordsByIds(dictionary.wordIds);
+  final api = DictionaryApi();
+  await api.removeWords(dictionary.wordIds);
   await DictionaryStorage.removeDictionary(dictionary.name);
 }
 

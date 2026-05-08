@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../../models/ime_format.dart';
 import '../../models/parse_result.dart';
-import '../../models/table_entry.dart';
+import '../../generated/dictionary_api.g.dart';
 import '../base/text_parser.dart';
 
 class BaiduPhonePinyinParser extends TextParser {
@@ -12,11 +12,11 @@ class BaiduPhonePinyinParser extends TextParser {
   Encoding get encoding => utf8;
 
   @override
-  Future<List<TableEntry>> parseText(
+  Future<List<TableEntryData>> parseText(
     String content, {
     void Function(ParseProgress)? onProgress,
   }) async {
-    final entries = <TableEntry>[];
+    final entries = <TableEntryData>[];
     final lines = content.split('\n');
 
     for (int i = 0; i < lines.length; i++) {
@@ -43,7 +43,7 @@ class BaiduPhonePinyinParser extends TextParser {
   }
 
   @override
-  TableEntry? parseLine(String line) {
+  TableEntryData? parseLine(String line) {
     final match = RegExp(r'(.+?)\((.+?)\)').firstMatch(line);
     if (match == null) return null;
 
@@ -52,7 +52,7 @@ class BaiduPhonePinyinParser extends TextParser {
 
     if (word.isEmpty) return null;
 
-    return TableEntry(
+    return TableEntryData(
       word: word,
       shortcut: pinyin,
       frequency: 1,
