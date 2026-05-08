@@ -54,6 +54,7 @@ class BaiduBdictParser extends BinaryParser {
           break;
         }
       } catch (e) {
+        print('百度BDICT解析词条失败: $e');
         break;
       }
     }

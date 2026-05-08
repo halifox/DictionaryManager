@@ -87,9 +87,6 @@ class FileImportPage extends HookConsumerWidget {
         }
 
         final parser = ParserFactory.createParserByFormat(targetFormat);
-        if (parser == null) {
-          throw Exception('暂不支持此文件格式');
-        }
         final parseResult = await parser.parseFile(
           filePath,
           onProgress: (p) {
@@ -115,10 +112,11 @@ class FileImportPage extends HookConsumerWidget {
           );
         }
       } catch (e) {
+        print('解析文件失败: $e');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('解析失败，请检查文件格式是否正确'),
+            SnackBar(
+              content: Text('解析失败: $e'),
               behavior: SnackBarBehavior.floating,
             ),
           );

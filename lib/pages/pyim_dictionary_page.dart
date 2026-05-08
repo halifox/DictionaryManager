@@ -1,9 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../models/ime_format.dart';
+import '../parsers/parser_factory.dart';
 import '../providers/dictionary_download_provider.dart';
 import '../providers/installed_dictionaries_provider.dart';
-import '../services/table_parser.dart';
+import '../parsers/text/pyim_table_parser.dart';
 import 'dictionary_download_page.dart';
 import 'dictionary_preview_page.dart';
 
@@ -113,7 +115,9 @@ class PyimDictionaryPage extends HookConsumerWidget {
                               builder: (context) => DictionaryPreviewPage(
                                 loadData: () async {
                                   final path = await ref.read(getDictionaryPathProvider(fileName).future);
-                                  return TableParser.parseFile(path);
+                                  final parser = ParserFactory.createParserByFormat(ImeFormat.pyimTable);
+                                  final result = await parser.parseFile(path);
+                                  return result.entries;
                                 },
                                 dictionaryName: dictName,
                                 category: 'pyim',
@@ -128,6 +132,7 @@ class PyimDictionaryPage extends HookConsumerWidget {
                               builder: (context) => DictionaryDownloadPage(
                                 fileName: fileName,
                                 dictionaryName: dictName,
+                                format: ImeFormat.pyimTable,
                               ),
                             ),
                           );
@@ -300,6 +305,7 @@ class PyimDictionaryPage extends HookConsumerWidget {
                         builder: (context) => DictionaryDownloadPage(
                           fileName: fileName,
                           dictionaryName: dictName,
+                          format: ImeFormat.pyimTable,
                         ),
                       ),
                     );
@@ -339,7 +345,11 @@ class PyimDictionaryPage extends HookConsumerWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => DictionaryPreviewPage(
-                    loadData: () => TableParser.parseFile(filePath),
+                    loadData: () async {
+                      final parser = PyimTableParser();
+                      final result = await parser.parseFile(filePath);
+                      return result.entries;
+                    },
                     dictionaryName: fileName.replaceAll('.table', ''),
                     category: 'pyim',
                     source: 'local',

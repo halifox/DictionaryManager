@@ -39,6 +39,7 @@ class DictionaryPreviewPage extends HookConsumerWidget {
         loadedWords.value = data;
         isLoading.value = false;
       }).catchError((e) {
+        print(e);
         error.value = e.toString();
         isLoading.value = false;
       });

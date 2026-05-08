@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../models/ime_format.dart';
 import '../providers/dictionary_download_provider.dart';
-import '../services/table_parser.dart';
+import '../parsers/parser_factory.dart';
 import 'dictionary_preview_page.dart';
 
 class DictionaryDownloadPage extends HookConsumerWidget {
@@ -9,14 +10,22 @@ class DictionaryDownloadPage extends HookConsumerWidget {
     super.key,
     required this.fileName,
     required this.dictionaryName,
+    required this.format,
+    this.downloadUrl,
+    this.category = 'pyim',
   });
 
   final String fileName;
   final String dictionaryName;
+  final ImeFormat format;
+  final String? downloadUrl;
+  final String category;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final downloadState = ref.watch(dictionaryDownloaderProvider(fileName));
+    final downloadState = downloadUrl != null
+        ? ref.watch(sogouDictionaryDownloaderProvider(fileName, downloadUrl!))
+        : ref.watch(dictionaryDownloaderProvider(fileName));
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +37,11 @@ class DictionaryDownloadPage extends HookConsumerWidget {
             // 下载完成，解析并跳转
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               // 刷新下载状态
-              ref.invalidate(isDictionaryDownloadedProvider(fileName));
+              if (downloadUrl != null) {
+                ref.invalidate(isSogouDictionaryDownloadedProvider(fileName));
+              } else {
+                ref.invalidate(isDictionaryDownloadedProvider(fileName));
+              }
 
               if (context.mounted) {
                 Navigator.pushReplacement(
@@ -36,11 +49,16 @@ class DictionaryDownloadPage extends HookConsumerWidget {
                   MaterialPageRoute(
                     builder: (context) => DictionaryPreviewPage(
                       loadData: () async {
-                        final path = await ref.read(getDictionaryPathProvider(fileName).future);
-                        return TableParser.parseFile(path);
+                        final path = downloadUrl != null
+                            ? await ref.read(getSogouDictionaryPathProvider(fileName).future)
+                            : await ref.read(getDictionaryPathProvider(fileName).future);
+
+                        final parser = ParserFactory.createParserByFormat(format);
+                        final result = await parser.parseFile(path);
+                        return result.entries;
                       },
                       dictionaryName: dictionaryName,
-                      category: 'pyim',
+                      category: category,
                       source: 'online',
                     ),
                   ),

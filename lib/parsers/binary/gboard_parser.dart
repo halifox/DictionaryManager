@@ -66,6 +66,7 @@ class GboardParser extends BaseParser {
           ));
         }
       } catch (e) {
+        print('Gboard解析词条失败 (行 $i): $e');
         continue;
       }
     }

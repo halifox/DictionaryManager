@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../models/ime_format.dart';
+import 'baidu_dictionary_page.dart';
 import 'file_import_page.dart';
 import 'installed_dictionaries_page.dart';
 import 'pyim_dictionary_page.dart';
+import 'sogou_dictionary_page.dart';
 import 'user_dictionary_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -66,9 +68,9 @@ class HomePage extends StatelessWidget {
         itemBuilder: (context, index) {
           final formatInfo = ImeFormatInfo.allFormats[index];
           return Padding(
-            padding: .symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             child: ListTile(
-              contentPadding: .symmetric(vertical: 4, horizontal: 12),
+              contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -109,6 +111,20 @@ class HomePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const PyimDictionaryPage(),
+                    ),
+                  );
+                } else if (formatInfo.format == ImeFormat.sougouText) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SogouDictionaryPage(),
+                    ),
+                  );
+                } else if (formatInfo.format == ImeFormat.baiduText) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BaiduDictionaryPage(),
                     ),
                   );
                 } else {

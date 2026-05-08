@@ -43,6 +43,7 @@ class DictionaryStorage {
     try {
       return dictionaries.firstWhere((d) => d.name == name);
     } catch (e) {
+      print('获取词库失败 ($name): $e');
       return null;
     }
   }

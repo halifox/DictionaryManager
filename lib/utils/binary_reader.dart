@@ -32,6 +32,9 @@ class BinaryReader {
   }
 
   Uint8List readBytes(int count) {
+    if (position + count > _data.length) {
+      throw RangeError('尝试读取 $count 字节，但只剩余 ${_data.length - position} 字节');
+    }
     final bytes = _data.sublist(position, position + count);
     position += count;
     return bytes;

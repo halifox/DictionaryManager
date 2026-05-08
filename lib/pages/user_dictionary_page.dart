@@ -64,10 +64,11 @@ class UserDictionaryPage extends HookConsumerWidget {
                       ).showSnackBar(const SnackBar(content: Text('用户词库已清空')));
                     }
                   } catch (e) {
+                    print('清空用户词库失败: $e');
                     if (context.mounted) {
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(const SnackBar(content: Text('清空失败，请稍后重试')));
+                      ).showSnackBar(SnackBar(content: Text('清空失败: $e')));
                     }
                   }
                 }

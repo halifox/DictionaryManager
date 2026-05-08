@@ -48,6 +48,7 @@ class BaiduBcdParser extends BinaryParser {
           ));
         }
       } catch (e) {
+        print('百度BCD解析词条失败: $e');
         break;
       }
     }
