@@ -11,11 +11,14 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('PureDict'),
         actions: [
           PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),
             onSelected: (value) {
               if (value == 'installed') {
                 Navigator.push(
@@ -34,22 +37,22 @@ class HomePage extends StatelessWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'installed',
                 child: Row(
                   children: [
                     Icon(Icons.download_done_outlined),
-                    SizedBox(width: 12),
-                    Text('已安装词典'),
+                    const SizedBox(width: 12),
+                    Text('已安装词库'),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'user',
                 child: Row(
                   children: [
                     Icon(Icons.person_outline),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text('用户词库'),
                   ],
                 ),
@@ -62,31 +65,63 @@ class HomePage extends StatelessWidget {
         itemCount: ImeFormatInfo.allFormats.length,
         itemBuilder: (context, index) {
           final formatInfo = ImeFormatInfo.allFormats[index];
-          return ListTile(
-            leading: Icon(
-              formatInfo.icon,
-              color: Theme.of(context).colorScheme.primary,
+          return Padding(
+            padding: .symmetric(vertical: 4, horizontal: 8),
+            child: ListTile(
+              contentPadding: .symmetric(vertical: 4, horizontal: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              tileColor: colorScheme.primaryContainer.withAlpha(100),
+              leading: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.primaryContainer,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    formatInfo.icon,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              title: Text(
+                formatInfo.displayName,
+                style: TextStyle(color: colorScheme.onSurface),
+              ),
+              trailing: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.primaryContainer,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              onTap: () {
+                if (formatInfo.format == ImeFormat.pyimTable) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PyimDictionaryPage(),
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          FileImportPage(formatInfo: formatInfo),
+                    ),
+                  );
+                }
+              },
             ),
-            title: Text(formatInfo.displayName),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              if (formatInfo.format == ImeFormat.pyimTable) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PyimDictionaryPage(),
-                  ),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        FileImportPage(formatInfo: formatInfo),
-                  ),
-                );
-              }
-            },
           );
         },
       ),

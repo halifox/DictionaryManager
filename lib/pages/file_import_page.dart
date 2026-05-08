@@ -65,7 +65,7 @@ class FileImportPage extends HookConsumerWidget {
 
       isLoading.value = true;
       progress.value = 0.0;
-      statusMessage.value = '正在解析...';
+      statusMessage.value = '正在解析 ${path.basename(filePath)}...';
 
       try {
         ImeFormat targetFormat = formatInfo.format;
@@ -88,9 +88,8 @@ class FileImportPage extends HookConsumerWidget {
 
         final parser = ParserFactory.createParserByFormat(targetFormat);
         if (parser == null) {
-          throw Exception('不支持的文件格式');
+          throw Exception('暂不支持此文件格式');
         }
-
         final parseResult = await parser.parseFile(
           filePath,
           onProgress: (p) {
@@ -100,15 +99,17 @@ class FileImportPage extends HookConsumerWidget {
             }
           },
         );
-
         if (context.mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DictionaryPreviewPage(
-                words: parseResult.entries,
+                loadData: () async {
+                  return parseResult.entries;
+                },
                 dictionaryName: path.basenameWithoutExtension(filePath),
                 category: formatInfo.format.name,
+                source: 'local',
               ),
             ),
           );
@@ -116,8 +117,8 @@ class FileImportPage extends HookConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('解析失败: $e'),
+            const SnackBar(
+              content: Text('解析失败，请检查文件格式是否正确'),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -146,7 +147,7 @@ class FileImportPage extends HookConsumerWidget {
             IconButton(
               icon: const Icon(Icons.help_outline),
               onPressed: () => _openWiki(context),
-              tooltip: '查看帮助文档',
+              tooltip: '查看格式说明',
             ),
         ],
       ),

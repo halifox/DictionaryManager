@@ -1,10 +1,12 @@
 class TableEntry {
+  final int? id;
   final String word;
   final String? shortcut;
   final int frequency;
   final String? locale;
 
   TableEntry({
+    this.id,
     required this.word,
     this.shortcut,
     required this.frequency,
@@ -36,6 +38,6 @@ class TableEntry {
 
   @override
   String toString() {
-    return 'TableEntry(word: $word, shortcut: $shortcut, frequency: $frequency, locale: $locale)';
+    return 'TableEntry(id: $id, word: $word, shortcut: $shortcut, frequency: $frequency, locale: $locale)';
   }
 }

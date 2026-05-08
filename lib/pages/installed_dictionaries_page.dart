@@ -9,11 +9,12 @@ class InstalledDictionariesPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final dictionariesAsync = ref.watch(installedDictionariesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('已安装词典'),
+        title: const Text('已安装词库'),
       ),
       body: dictionariesAsync.when(
         data: (dictionaries) {
@@ -29,7 +30,7 @@ class InstalledDictionariesPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '暂无已安装词典',
+                    '暂无已安装词库，请先导入词库文件',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -43,44 +44,85 @@ class InstalledDictionariesPage extends HookConsumerWidget {
             itemCount: dictionaries.length,
             itemBuilder: (context, index) {
               final dict = dictionaries[index];
-              return ListTile(
-                leading: Icon(
-                  Icons.book_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text(dict.displayName),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () async {
-                  // 查询词典内容
-                  final allWords = await NativeService.queryUserDictionary();
-                  final dictWords = allWords.where((word) {
-                    // 这里需要通过某种方式识别词条属于哪个词典
-                    // 由于我们有 wordIds，可以通过 ID 匹配
-                    // 但 queryUserDictionary 返回的数据没有 ID
-                    // 所以我们暂时返回所有词条，后续可以优化
-                    return true;
-                  }).toList();
-
-                  if (context.mounted) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  tileColor: colorScheme.primaryContainer.withAlpha(100),
+                  leading: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.primaryContainer,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.book_outlined,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    dict.displayName,
+                    style: TextStyle(color: colorScheme.onSurface),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: .min,
+                    children: [
+                      if(dict.source=="local")
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '本地',
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorScheme.primaryContainer,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.arrow_forward,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DictionaryPreviewPage(
-                          words: dictWords,
+                          loadData: () => NativeService.queryWordsByIds(dict.wordIds),
                           dictionaryName: dict.name,
                           category: dict.category,
+                          source: dict.source,
                         ),
                       ),
                     );
-                  }
-                },
+                  },
+                ),
               );
             },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
-          child: Text('加载失败: $error'),
+          child: Text('加载失败，请稍后重试'),
         ),
       ),
     );

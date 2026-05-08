@@ -14,12 +14,14 @@ class InstallProgressPage extends HookConsumerWidget {
     required this.words,
     required this.dictionaryName,
     this.category = 'local',
+    this.source = 'local',
     super.key,
   });
 
   final List<TableEntry> words;
   final String dictionaryName;
   final String category;
+  final String source;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,6 +35,7 @@ class InstallProgressPage extends HookConsumerWidget {
           InstalledDictionary(
             name: dictionaryName,
             category: category,
+            source: source,
             wordIds: ids,
             installedAt: DateTime.now(),
           ),
@@ -51,7 +54,7 @@ class InstallProgressPage extends HookConsumerWidget {
       ),
       body: installState.when(
         data: (ids) {
-          return StateView.finish(title: '安装完成', message: '成功安装 ${ids.length} 个词条');
+          return StateView.finish(title: '安装完成', message: '成功安装 ${ids.length} 条');
         },
         error: (error, stackTrace) {
           return StateView.error(message: error.toString());
@@ -60,6 +63,13 @@ class InstallProgressPage extends HookConsumerWidget {
           return StateView.loading(title: "安装中", message: "正在安装词库...");
         },
       ),
+      floatingActionButton: installState.hasValue
+          ? FloatingActionButton.extended(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('返回'),
+            )
+          : null,
     );
   }
 }

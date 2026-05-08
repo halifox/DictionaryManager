@@ -51,7 +51,7 @@ class StateView extends StatelessWidget {
 
   factory StateView.empty({
     String title = '暂无内容',
-    String message = '这里空空如也',
+    String message = '暂无数据',
     String? actionLabel,
     VoidCallback? onAction,
   }) {

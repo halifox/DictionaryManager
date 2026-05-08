@@ -75,6 +75,21 @@ class MainActivity : FlutterActivity() {
                         }
                     }
 
+                    "queryWordsByIds" -> {
+                        try {
+                            val ids = call.argument<List<Long>>("ids")
+                            if (ids == null) {
+                                result.error("INVALID_ARGUMENT", "ids is null", null)
+                            } else {
+                                val words = queryWordsByIds(ids)
+                                result.success(words)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            result.error("QUERY_ERROR", e.message, null)
+                        }
+                    }
+
                     "isImeEnabled" -> {
                         try {
                             val enabled = checkInputMethodSettingsActive()
@@ -138,9 +153,12 @@ class MainActivity : FlutterActivity() {
             val localeIndex = it.getColumnIndex(UserDictionary.Words.LOCALE)
             val shortcutIndex = it.getColumnIndex(UserDictionary.Words.SHORTCUT)
 
+            val idIndex = it.getColumnIndex(UserDictionary.Words._ID)
+
             while (it.moveToNext()) {
                 words.add(
                     mapOf(
+                        "id" to if (idIndex >= 0) it.getLong(idIndex) else null,
                         "word" to it.getString(wordIndex),
                         "frequency" to it.getInt(frequencyIndex),
                         "locale" to if (localeIndex >= 0) it.getString(localeIndex) else null,
@@ -195,5 +213,48 @@ class MainActivity : FlutterActivity() {
             deletedCount += applicationContext.contentResolver.delete(uri, null, null)
         }
         return deletedCount
+    }
+
+    private fun queryWordsByIds(ids: List<Long>): List<Map<String, Any?>> {
+        val words = mutableListOf<Map<String, Any?>>()
+        val projection = arrayOf(
+            UserDictionary.Words._ID,
+            UserDictionary.Words.WORD,
+            UserDictionary.Words.FREQUENCY,
+            UserDictionary.Words.LOCALE,
+            UserDictionary.Words.SHORTCUT
+        )
+
+        ids.forEach { id ->
+            val cursor = applicationContext.contentResolver.query(
+                UserDictionary.Words.CONTENT_URI,
+                projection,
+                "${UserDictionary.Words._ID} = ?",
+                arrayOf(id.toString()),
+                null
+            )
+
+            cursor?.use {
+                val idIndex = it.getColumnIndex(UserDictionary.Words._ID)
+                val wordIndex = it.getColumnIndex(UserDictionary.Words.WORD)
+                val frequencyIndex = it.getColumnIndex(UserDictionary.Words.FREQUENCY)
+                val localeIndex = it.getColumnIndex(UserDictionary.Words.LOCALE)
+                val shortcutIndex = it.getColumnIndex(UserDictionary.Words.SHORTCUT)
+
+                if (it.moveToFirst()) {
+                    words.add(
+                        mapOf(
+                            "id" to if (idIndex >= 0) it.getLong(idIndex) else null,
+                            "word" to it.getString(wordIndex),
+                            "frequency" to it.getInt(frequencyIndex),
+                            "locale" to if (localeIndex >= 0) it.getString(localeIndex) else null,
+                            "shortcut" to if (shortcutIndex >= 0) it.getString(shortcutIndex) else null
+                        )
+                    )
+                }
+            }
+        }
+
+        return words
     }
 }

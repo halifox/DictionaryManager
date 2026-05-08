@@ -85,7 +85,7 @@ class PermissionRequestPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('稍后'),
+                child: const Text('取消'),
               ),
             ],
           ),

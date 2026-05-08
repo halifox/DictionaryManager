@@ -11,6 +11,7 @@ class UserDictionaryPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final userDictState = ref.watch(loadUserDictionaryProvider);
     final searchController = useTextEditingController();
     final searchQuery = useState('');
@@ -52,7 +53,7 @@ class UserDictionaryPage extends HookConsumerWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(SnackBar(content: Text('清空失败: $e')));
+                      ).showSnackBar(const SnackBar(content: Text('清空失败，请稍后重试')));
                     }
                   }
                 }
@@ -119,7 +120,7 @@ class UserDictionaryPage extends HookConsumerWidget {
                 child: filteredWords.isEmpty
                     ? Center(
                         child: Text(
-                          '未找到匹配结果',
+                          '未找到匹配的词条',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       )
@@ -127,16 +128,36 @@ class UserDictionaryPage extends HookConsumerWidget {
                         itemCount: filteredWords.length,
                         itemBuilder: (context, index) {
                           final word = filteredWords[index];
-                          return ListTile(
-                            leading: Icon(
-                              Icons.text_fields,
-                              color: Theme.of(context).colorScheme.primary,
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              tileColor: colorScheme.primaryContainer.withAlpha(100),
+                              leading: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: colorScheme.primaryContainer,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.text_fields,
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                word.word,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                              subtitle: Text(word.shortcut ?? ""),
                             ),
-                            title: Text(
-                              word.word,
-                              style: const TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            subtitle: Text(word.shortcut ?? ""),
                           );
                         },
                       ),

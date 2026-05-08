@@ -30,6 +30,7 @@ class NativeService {
       return result
           .map(
             (item) => TableEntry(
+              id: item['id'] as int?,
               word: item['word'] as String,
               frequency: item['frequency'] as int,
               locale: item['locale'] as String?,
@@ -66,6 +67,28 @@ class NativeService {
       return result as int;
     } on PlatformException catch (e) {
       throw Exception('删除词条失败: ${e.message}');
+    }
+  }
+
+  static Future<List<TableEntry>> queryWordsByIds(List<int> ids) async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod(
+        'queryWordsByIds',
+        {'ids': ids},
+      );
+      return result
+          .map(
+            (item) => TableEntry(
+              id: item['id'] as int?,
+              word: item['word'] as String,
+              frequency: item['frequency'] as int,
+              locale: item['locale'] as String?,
+              shortcut: item['shortcut'] as String?,
+            ),
+          )
+          .toList();
+    } on PlatformException catch (e) {
+      throw Exception('根据ID查询词条失败: ${e.message}');
     }
   }
 }

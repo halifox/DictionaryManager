@@ -27,9 +27,6 @@ class DictionaryDownloadPage extends HookConsumerWidget {
           if (progress.progress >= 1.0) {
             // 下载完成，解析并跳转
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-              final path = await ref.read(getDictionaryPathProvider(fileName).future);
-              final words = await TableParser.parseFile(path);
-
               // 刷新下载状态
               ref.invalidate(isDictionaryDownloadedProvider(fileName));
 
@@ -38,9 +35,13 @@ class DictionaryDownloadPage extends HookConsumerWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DictionaryPreviewPage(
-                      words: words,
+                      loadData: () async {
+                        final path = await ref.read(getDictionaryPathProvider(fileName).future);
+                        return TableParser.parseFile(path);
+                      },
                       dictionaryName: dictionaryName,
                       category: 'pyim',
+                      source: 'online',
                     ),
                   ),
                 );

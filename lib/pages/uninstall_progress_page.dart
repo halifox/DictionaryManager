@@ -42,7 +42,7 @@ class UninstallProgressPage extends HookConsumerWidget {
 
           return StateView.finish(
             title: '卸载完成',
-            message: '已成功卸载 ${dictionary.wordIds.length} 个词条',
+            message: '已成功卸载 ${dictionary.wordIds.length} 条',
           );
         },
         error: (error, stackTrace) {
@@ -52,6 +52,13 @@ class UninstallProgressPage extends HookConsumerWidget {
           return StateView.loading(title: "卸载中", message: "正在卸载词库...");
         },
       ),
+      floatingActionButton: uninstallState.hasValue
+          ? FloatingActionButton.extended(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('返回'),
+            )
+          : null,
     );
   }
 }
