@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:archive/archive.dart';
 
@@ -11,10 +10,7 @@ class GboardParser extends BaseParser {
   GboardParser() : super(ImeFormat.gboard);
 
   @override
-  Future<ParseResult> parseFile(
-    String filePath, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<ParseResult> parseFile(String filePath) async {
     final stopwatch = Stopwatch()..start();
     final entries = <TableEntryData>[];
 
@@ -55,14 +51,6 @@ class GboardParser extends BaseParser {
             shortcut: pinyin,
             frequency: 1,
             locale: 'zh_CN',
-          ));
-        }
-
-        if (i % 100 == 0) {
-          onProgress?.call(ParseProgress(
-            current: i,
-            total: lines.length,
-            message: '正在解析词条...',
           ));
         }
       } catch (e) {

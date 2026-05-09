@@ -36,7 +36,6 @@ class FileImportPage extends HookConsumerWidget {
   Future<void> _pickAndParseFile(
     BuildContext context,
     ValueNotifier<bool> isLoading,
-    ValueNotifier<double> progress,
     ValueNotifier<String> statusMessage,
   ) async {
     final result = await FilePicker.platform.pickFiles(type: FileType.any);
@@ -64,7 +63,6 @@ class FileImportPage extends HookConsumerWidget {
       }
 
       isLoading.value = true;
-      progress.value = 0.0;
       statusMessage.value = '正在解析 ${path.basename(filePath)}...';
 
       try {
@@ -87,23 +85,14 @@ class FileImportPage extends HookConsumerWidget {
         }
 
         final parser = ParserFactory.createParserByFormat(targetFormat);
-        final parseResult = await parser.parseFile(
-          filePath,
-          onProgress: (p) {
-            if (context.mounted) {
-              progress.value = p.percentage;
-              statusMessage.value = p.message;
-            }
-          },
-        );
+        final parseResult = await parser.parseFile(filePath);
+
         if (context.mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DictionaryPreviewPage(
-                loadData: () async {
-                  return parseResult.entries;
-                },
+                loadData: () async => parseResult.entries,
                 dictionaryName: path.basenameWithoutExtension(filePath),
                 category: formatInfo.format.name,
                 source: 'local',
@@ -124,7 +113,6 @@ class FileImportPage extends HookConsumerWidget {
       } finally {
         if (context.mounted) {
           isLoading.value = false;
-          progress.value = 0.0;
           statusMessage.value = '';
         }
       }
@@ -134,7 +122,6 @@ class FileImportPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState(false);
-    final progress = useState(0.0);
     final statusMessage = useState('');
 
     return Scaffold(
@@ -174,13 +161,9 @@ class FileImportPage extends HookConsumerWidget {
               ),
               const SizedBox(height: 48),
               if (isLoading.value) ...[
-                CircularProgressIndicator(
-                  value: progress.value > 0 ? progress.value : null,
-                ),
+                const CircularProgressIndicator(),
                 const SizedBox(height: 16),
                 Text(statusMessage.value),
-                if (progress.value > 0)
-                  Text('${(progress.value * 100).toStringAsFixed(1)}%'),
               ],
             ],
           ),
@@ -192,7 +175,6 @@ class FileImportPage extends HookConsumerWidget {
               onPressed: () => _pickAndParseFile(
                 context,
                 isLoading,
-                progress,
                 statusMessage,
               ),
               icon: const Icon(Icons.folder_open),

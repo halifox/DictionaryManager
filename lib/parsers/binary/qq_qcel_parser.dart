@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -11,10 +10,7 @@ class QqQcelParser extends BinaryParser {
   QqQcelParser() : super(ImeFormat.qqQcel);
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
@@ -33,20 +29,10 @@ class QqQcelParser extends BinaryParser {
       reader.skip(size);
     }
 
-    int processedGroups = 0;
     while (reader.position < bytes.length - 20) {
       try {
         final wordEntries = _readWordGroup(reader);
         entries.addAll(wordEntries);
-
-        processedGroups++;
-        if (processedGroups % 100 == 0) {
-          onProgress?.call(ParseProgress(
-            current: entries.length,
-            total: wordCount,
-            message: '正在解析词条...',
-          ));
-        }
       } catch (e) {
         break;
       }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../base/text_parser.dart';
@@ -13,10 +12,7 @@ class XiaoxiaoParser extends TextParser {
   Encoding get encoding => EncodingHelper.gb18030;
 
   @override
-  Future<List<TableEntryData>> parseText(
-    String content, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseText(String content) async {
     final entries = <TableEntryData>[];
     final lines = content.split('\n');
     final regex = RegExp(r'[^\s#]+( [一-龥]+)+');
@@ -30,14 +26,6 @@ class XiaoxiaoParser extends TextParser {
       final lineEntries = parseLineToEntries(line);
       if (lineEntries != null) {
         entries.addAll(lineEntries);
-      }
-
-      if (i % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: i,
-          total: lines.length,
-          message: '正在解析...',
-        ));
       }
     }
 

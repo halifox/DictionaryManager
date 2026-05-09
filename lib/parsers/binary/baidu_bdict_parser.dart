@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -23,10 +22,7 @@ class BaiduBdictParser extends BinaryParser {
   BaiduBdictParser() : super(ImeFormat.baiduBdict);
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
@@ -34,22 +30,12 @@ class BaiduBdictParser extends BinaryParser {
     final endPosition = reader.readInt32();
 
     reader.position = 0x350;
-    int count = 0;
 
     while (reader.position < endPosition && reader.position < bytes.length - 20) {
       try {
         final entry = _parseWord(reader);
         if (entry != null) {
           entries.add(entry);
-          count++;
-
-          if (count % 100 == 0) {
-            onProgress?.call(ParseProgress(
-              current: reader.position,
-              total: endPosition,
-              message: '已解析 $count 个词条...',
-            ));
-          }
         } else {
           break;
         }

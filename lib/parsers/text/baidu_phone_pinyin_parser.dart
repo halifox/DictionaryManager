@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../base/text_parser.dart';
 
@@ -12,10 +11,7 @@ class BaiduPhonePinyinParser extends TextParser {
   Encoding get encoding => utf8;
 
   @override
-  Future<List<TableEntryData>> parseText(
-    String content, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseText(String content) async {
     final entries = <TableEntryData>[];
     final lines = content.split('\n');
 
@@ -28,14 +24,6 @@ class BaiduPhonePinyinParser extends TextParser {
       final entry = parseLine(line);
       if (entry != null) {
         entries.add(entry);
-      }
-
-      if (i % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: i,
-          total: lines.length,
-          message: '正在解析...',
-        ));
       }
     }
 

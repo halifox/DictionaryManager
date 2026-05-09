@@ -1,10 +1,7 @@
 import 'dart:typed_data';
-import 'dart:io';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
-import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
 import '../base/binary_parser.dart';
 
@@ -12,10 +9,7 @@ class LingoesLd2Parser extends BinaryParser {
   LingoesLd2Parser() : super(ImeFormat.lingoesLd2);
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
@@ -75,12 +69,6 @@ class LingoesLd2Parser extends BinaryParser {
     // 灵格斯格式使用 DEFLATE 压缩，需要实现解压缩
     // 解压后的数据包含：词组索引、词组、XML解释
     // 由于 Dart 的 zlib 解压较复杂，这里标记为 TODO
-
-    onProgress?.call(ParseProgress(
-      current: 0,
-      total: definitions,
-      message: '灵格斯格式解析需要实现 DEFLATE 解压缩',
-    ));
 
     return entries;
   }

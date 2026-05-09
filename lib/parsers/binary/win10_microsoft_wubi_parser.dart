@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -11,10 +10,7 @@ class Win10MicrosoftWubiParser extends BinaryParser {
   Win10MicrosoftWubiParser() : super(ImeFormat.win10MicrosoftWubi);
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
@@ -49,14 +45,6 @@ class Win10MicrosoftWubiParser extends BinaryParser {
         final entry = _readOnePhrase(reader, nextStartPosition);
         if (entry != null) {
           entries.add(entry);
-        }
-
-        if (i % 100 == 0) {
-          onProgress?.call(ParseProgress(
-            current: i,
-            total: phraseCount,
-            message: '正在解析词条...',
-          ));
         }
       } catch (e) {
         break;

@@ -9,15 +9,12 @@ abstract class BinaryParser extends BaseParser {
   BinaryParser(super.format);
 
   @override
-  Future<ParseResult> parseFile(
-    String filePath, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<ParseResult> parseFile(String filePath) async {
     final stopwatch = Stopwatch()..start();
     final file = File(filePath);
     final bytes = await file.readAsBytes();
 
-    final entries = await parseBinary(bytes, onProgress: onProgress);
+    final entries = await parseBinary(bytes);
 
     stopwatch.stop();
     return ParseResult(
@@ -28,8 +25,5 @@ abstract class BinaryParser extends BaseParser {
     );
   }
 
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  });
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes);
 }

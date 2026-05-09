@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -22,30 +21,17 @@ class BaiduBcdParser extends BinaryParser {
   ];
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
     reader.position = 0x350;
-    int count = 0;
 
     while (reader.position < bytes.length - 10) {
       try {
         final entry = _importWord(reader);
         if (entry != null) {
           entries.add(entry);
-        }
-
-        count++;
-        if (count % 100 == 0) {
-          onProgress?.call(ParseProgress(
-            current: count,
-            total: -1,
-            message: '正在解析词条...',
-          ));
         }
       } catch (e) {
         print('百度BCD解析词条失败: $e');

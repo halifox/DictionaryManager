@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:io';
 
 import '../../models/ime_format.dart';
@@ -10,10 +9,7 @@ class MacOsPlistParser extends BaseParser {
   MacOsPlistParser() : super(ImeFormat.macOsPlist);
 
   @override
-  Future<ParseResult> parseFile(
-    String filePath, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<ParseResult> parseFile(String filePath) async {
     final stopwatch = Stopwatch()..start();
     final entries = <TableEntryData>[];
 
@@ -30,7 +26,6 @@ class MacOsPlistParser extends BaseParser {
     );
 
     final matches = dictPattern.allMatches(content);
-    int count = 0;
 
     for (final match in matches) {
       final word = match.group(1) ?? '';
@@ -42,15 +37,6 @@ class MacOsPlistParser extends BaseParser {
           shortcut: shortcut,
           frequency: 1,
           locale: 'zh_CN',
-        ));
-      }
-
-      count++;
-      if (count % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: count,
-          total: -1,
-          message: '正在解析词条...',
         ));
       }
     }

@@ -16,17 +16,3 @@ class ParseResult {
     this.warnings = const [],
   });
 }
-
-class ParseProgress {
-  final int current;
-  final int total;
-  final String message;
-
-  ParseProgress({
-    required this.current,
-    required this.total,
-    required this.message,
-  });
-
-  double get percentage => total > 0 ? current / total : 0.0;
-}

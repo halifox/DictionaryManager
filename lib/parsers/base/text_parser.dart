@@ -11,15 +11,12 @@ abstract class TextParser extends BaseParser {
   Encoding get encoding => utf8;
 
   @override
-  Future<ParseResult> parseFile(
-    String filePath, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<ParseResult> parseFile(String filePath) async {
     final stopwatch = Stopwatch()..start();
     final file = File(filePath);
     final content = await file.readAsString(encoding: encoding);
 
-    final entries = await parseText(content, onProgress: onProgress);
+    final entries = await parseText(content);
 
     stopwatch.stop();
     return ParseResult(
@@ -30,10 +27,7 @@ abstract class TextParser extends BaseParser {
     );
   }
 
-  Future<List<TableEntryData>> parseText(
-    String content, {
-    void Function(ParseProgress)? onProgress,
-  });
+  Future<List<TableEntryData>> parseText(String content);
 
   TableEntryData? parseLine(String line);
 }

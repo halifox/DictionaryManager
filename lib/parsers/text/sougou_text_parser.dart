@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../base/text_parser.dart';
@@ -13,30 +12,17 @@ class SougouTextParser extends TextParser {
   Encoding get encoding => EncodingHelper.gbk;
 
   @override
-  Future<List<TableEntryData>> parseText(
-    String content, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseText(String content) async {
     final entries = <TableEntryData>[];
     final lines = content.split('\n');
 
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i].trim();
-      if (line.isEmpty) {
-        continue;
-      }
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
 
-      final entry = parseLine(line);
+      final entry = parseLine(trimmed);
       if (entry != null) {
         entries.add(entry);
-      }
-
-      if (i % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: i,
-          total: lines.length,
-          message: '正在解析...',
-        ));
       }
     }
 

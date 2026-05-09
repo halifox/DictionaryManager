@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -14,10 +13,7 @@ class QQQpydParser extends BinaryParser {
   QQQpydParser() : super(ImeFormat.qqQpyd);
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
 
     reader.position = 0x38;
@@ -30,11 +26,7 @@ class QQQpydParser extends BinaryParser {
     final compressedData = reader.readBytes(bytes.length - startAddress);
     final decompressedData = _inflateData(compressedData);
 
-    return _parseDecompressedData(
-      decompressedData,
-      wordCount,
-      onProgress,
-    );
+    return _parseDecompressedData(decompressedData, wordCount);
   }
 
   Uint8List _inflateData(Uint8List compressed) {
@@ -45,12 +37,10 @@ class QQQpydParser extends BinaryParser {
   List<TableEntryData> _parseDecompressedData(
     Uint8List data,
     int wordCount,
-    void Function(ParseProgress)? onProgress,
   ) {
     final entries = <TableEntryData>[];
     int idx = 0;
     int unzippedDictStartAddr = -1;
-    int count = 0;
 
     while (idx + 10 <= data.length) {
       final pinyinLength = data[idx] & 0xff;
@@ -89,15 +79,6 @@ class QQQpydParser extends BinaryParser {
         frequency: 1,
         locale: 'zh_CN',
       ));
-
-      count++;
-      if (count % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: count,
-          total: wordCount,
-          message: '正在解析词条...',
-        ));
-      }
 
       idx += 0xa;
     }

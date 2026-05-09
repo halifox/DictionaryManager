@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../../utils/encoding_helper.dart';
 import '../../utils/binary_reader.dart';
@@ -22,10 +21,7 @@ class ZiguangUwlParser extends BinaryParser {
   ];
 
   @override
-  Future<List<TableEntryData>> parseBinary(
-    Uint8List bytes, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseBinary(Uint8List bytes) async {
     final reader = BinaryReader(bytes);
     final entries = <TableEntryData>[];
 
@@ -42,12 +38,6 @@ class ZiguangUwlParser extends BinaryParser {
         reader.position = 0xC00 + 1024 * i;
         final segmentEntries = _parseSegment(reader, isUnicode);
         entries.addAll(segmentEntries);
-
-        onProgress?.call(ParseProgress(
-          current: entries.length,
-          total: wordCount,
-          message: '正在解析词条...',
-        ));
       } catch (e) {
         break;
       }

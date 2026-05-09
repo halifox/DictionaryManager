@@ -1,4 +1,3 @@
-import 'package:puredict/models/table_entry.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../generated/dictionary_api.g.dart';

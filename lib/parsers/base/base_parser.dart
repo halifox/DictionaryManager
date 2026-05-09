@@ -6,10 +6,7 @@ abstract class BaseParser {
 
   BaseParser(this.format);
 
-  Future<ParseResult> parseFile(
-    String filePath, {
-    void Function(ParseProgress)? onProgress,
-  });
+  Future<ParseResult> parseFile(String filePath);
 
   Future<bool> canParse(String filePath);
 }

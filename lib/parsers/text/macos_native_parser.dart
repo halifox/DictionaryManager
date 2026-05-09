@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../models/ime_format.dart';
-import '../../models/parse_result.dart';
 import '../../generated/dictionary_api.g.dart';
 import '../base/text_parser.dart';
 
@@ -12,10 +11,7 @@ class MacOsNativeParser extends TextParser {
   Encoding get encoding => utf8;
 
   @override
-  Future<List<TableEntryData>> parseText(
-    String content, {
-    void Function(ParseProgress)? onProgress,
-  }) async {
+  Future<List<TableEntryData>> parseText(String content) async {
     final entries = <TableEntryData>[];
 
     final entryRegex = RegExp(
@@ -24,8 +20,6 @@ class MacOsNativeParser extends TextParser {
     );
 
     final matches = entryRegex.allMatches(content);
-    final total = matches.length;
-    int current = 0;
 
     for (final match in matches) {
       final word = match.group(1) ?? '';
@@ -37,15 +31,6 @@ class MacOsNativeParser extends TextParser {
           shortcut: shortcut,
           frequency: 1,
           locale: 'zh_CN',
-        ));
-      }
-
-      current++;
-      if (current % 100 == 0) {
-        onProgress?.call(ParseProgress(
-          current: current,
-          total: total,
-          message: '正在解析...',
         ));
       }
     }
