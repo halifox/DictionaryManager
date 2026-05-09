@@ -16,7 +16,11 @@ class DictionaryStorage {
 
   static Future<void> saveDictionary(InstalledDictionary dictionary) async {
     final dictionaries = await getInstalledDictionaries();
-    dictionaries.removeWhere((d) => d.name == dictionary.name);
+    dictionaries.removeWhere((d) =>
+      d.name == dictionary.name &&
+      d.source == dictionary.source &&
+      d.category == dictionary.category
+    );
     dictionaries.add(dictionary);
 
     final prefs = await SharedPreferences.getInstance();
@@ -24,26 +28,38 @@ class DictionaryStorage {
     await prefs.setString(_key, jsonString);
   }
 
-  static Future<void> removeDictionary(String name) async {
+  static Future<void> removeDictionary(String name, String source, String category) async {
     final dictionaries = await getInstalledDictionaries();
-    dictionaries.removeWhere((d) => d.name == name);
+    dictionaries.removeWhere((d) =>
+      d.name == name &&
+      d.source == source &&
+      d.category == category
+    );
 
     final prefs = await SharedPreferences.getInstance();
     final jsonString = json.encode(dictionaries.map((d) => d.toJson()).toList());
     await prefs.setString(_key, jsonString);
   }
 
-  static Future<bool> isDictionaryInstalled(String name) async {
+  static Future<bool> isDictionaryInstalled(String name, String source, String category) async {
     final dictionaries = await getInstalledDictionaries();
-    return dictionaries.any((d) => d.name == name);
+    return dictionaries.any((d) =>
+      d.name == name &&
+      d.source == source &&
+      d.category == category
+    );
   }
 
-  static Future<InstalledDictionary?> getDictionary(String name) async {
+  static Future<InstalledDictionary?> getDictionary(String name, String source, String category) async {
     final dictionaries = await getInstalledDictionaries();
     try {
-      return dictionaries.firstWhere((d) => d.name == name);
+      return dictionaries.firstWhere((d) =>
+        d.name == name &&
+        d.source == source &&
+        d.category == category
+      );
     } catch (e) {
-      print('获取词库失败 ($name): $e');
+      print('获取词库失败 ($name, $source, $category): $e');
       return null;
     }
   }

@@ -76,12 +76,12 @@ class FileImportPage extends HookConsumerWidget {
         } else if (formatInfo.format == ImeFormat.baiduText &&
             fileExt == '.bdict') {
           targetFormat = ImeFormat.baiduBdict;
+        } else if (formatInfo.format == ImeFormat.baiduText &&
+            fileExt == '.bcd') {
+          targetFormat = ImeFormat.baiduBcd;
         } else if (formatInfo.format == ImeFormat.sougouText &&
             fileExt == '.scel') {
           targetFormat = ImeFormat.sougouScel;
-        } else if (formatInfo.format == ImeFormat.baiduPhonePinyin &&
-            fileExt == '.bcd') {
-          targetFormat = ImeFormat.baiduBcd;
         }
 
         final parser = ParserFactory.createParserByFormat(targetFormat);

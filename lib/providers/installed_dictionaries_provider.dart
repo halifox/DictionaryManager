@@ -19,18 +19,18 @@ class InstalledDictionaries extends _$InstalledDictionaries {
     });
   }
 
-  Future<void> uninstall(String name) async {
-    final dictionary = await DictionaryStorage.getDictionary(name);
+  Future<void> uninstall(String name, String source, String category) async {
+    final dictionary = await DictionaryStorage.getDictionary(name, source, category);
     if (dictionary == null) return;
 
     final api = DictionaryApi();
     await api.removeWords(dictionary.wordIds);
-    await DictionaryStorage.removeDictionary(name);
+    await DictionaryStorage.removeDictionary(name, source, category);
     await refresh();
   }
 }
 
 @riverpod
-Future<bool> isDictionaryInstalled(Ref ref, String name) async {
-  return await DictionaryStorage.isDictionaryInstalled(name);
+Future<bool> isDictionaryInstalled(Ref ref, String name, String source, String category) async {
+  return await DictionaryStorage.isDictionaryInstalled(name, source, category);
 }

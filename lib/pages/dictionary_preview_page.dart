@@ -28,7 +28,7 @@ class DictionaryPreviewPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isInstalledAsync = ref.watch(isDictionaryInstalledProvider(dictionaryName));
+    final isInstalledAsync = ref.watch(isDictionaryInstalledProvider(dictionaryName, source, category));
 
     final loadedWords = useState<List<TableEntryData>?>(null);
     final isLoading = useState(true);
@@ -131,7 +131,7 @@ class DictionaryPreviewPage extends HookConsumerWidget {
                 );
 
                 if (confirmed == true && context.mounted) {
-                  final dictionary = await DictionaryStorage.getDictionary(dictionaryName);
+                  final dictionary = await DictionaryStorage.getDictionary(dictionaryName, source, category);
                   if (dictionary != null && context.mounted) {
                     Navigator.push(
                       context,

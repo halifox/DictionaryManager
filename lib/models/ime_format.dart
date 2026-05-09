@@ -70,6 +70,20 @@ class ImeFormatInfo {
   static const List<ImeFormatInfo> allFormats = [
     // PC端输入法
     ImeFormatInfo(
+      format: ImeFormat.sougouText,
+      displayName: '搜狗拼音（文本词库、Bin 格式备份词库和 scel 格式细胞词库）',
+      extensions: ['.txt', '.bin', '.scel'],
+      icon: Icons.keyboard_outlined,
+      wikiUrl: 'https://github.com/studyzy/imewlconverter/wiki/Sougou_Pinyin',
+    ),
+    ImeFormatInfo(
+      format: ImeFormat.baiduText,
+      displayName: '百度拼音（文本词库、bdict 和 bcd 格式）',
+      extensions: ['.txt', '.bdict', '.bcd'],
+      icon: Icons.keyboard_outlined,
+      wikiUrl: 'https://github.com/studyzy/imewlconverter/wiki/Baidu_PC',
+    ),
+    ImeFormatInfo(
       format: ImeFormat.pyimTable,
       displayName: 'Chinese-pyim (Linux)',
       extensions: ['.table'],
@@ -130,13 +144,7 @@ class ImeFormatInfo {
       icon: Icons.keyboard_outlined,
       wikiUrl: 'https://github.com/studyzy/imewlconverter/wiki/Win10Ms_Wubi',
     ),
-    ImeFormatInfo(
-      format: ImeFormat.baiduText,
-      displayName: '百度拼音 PC（文本词库、bdict 格式）',
-      extensions: ['.txt', '.bdict'],
-      icon: Icons.keyboard_outlined,
-      wikiUrl: 'https://github.com/studyzy/imewlconverter/wiki/Baidu_PC',
-    ),
+
     ImeFormatInfo(
       format: ImeFormat.bing,
       displayName: '必应输入法',
@@ -191,13 +199,7 @@ class ImeFormatInfo {
       extensions: ['.txt'],
       icon: Icons.keyboard_outlined,
     ),
-    ImeFormatInfo(
-      format: ImeFormat.sougouText,
-      displayName: '搜狗拼音（文本词库、Bin 格式备份词库和 scel 格式细胞词库）',
-      extensions: ['.txt', '.bin', '.scel'],
-      icon: Icons.keyboard_outlined,
-      wikiUrl: 'https://github.com/studyzy/imewlconverter/wiki/Sougou_Pinyin',
-    ),
+
     ImeFormatInfo(
       format: ImeFormat.sougouWubi,
       displayName: '搜狗五笔',
@@ -250,20 +252,8 @@ class ImeFormatInfo {
 
     // 手机端
     ImeFormatInfo(
-      format: ImeFormat.qqPhonePinyin,
-      displayName: 'QQ 手机拼音',
-      extensions: ['.txt'],
-      icon: Icons.keyboard_outlined,
-    ),
-    ImeFormatInfo(
-      format: ImeFormat.baiduPhonePinyin,
-      displayName: '百度手机拼音（文本词库和 bcd 格式）',
-      extensions: ['.txt', '.bcd'],
-      icon: Icons.keyboard_outlined,
-    ),
-    ImeFormatInfo(
       format: ImeFormat.gboard,
-      displayName: '谷歌拼音输入法',
+      displayName: 'Gboard 谷歌拼音输入法',
       extensions: ['.zip'],
       icon: Icons.keyboard_outlined,
     ),

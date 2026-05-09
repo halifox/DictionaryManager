@@ -59,7 +59,7 @@ final class UninstallDictionaryProvider
 }
 
 String _$uninstallDictionaryHash() =>
-    r'dcf7dcc413a977d6e3cb4e8cd75dc16d34c9c580';
+    r'd64b5896f5af6b01c420d18f1f24747038f2410d';
 
 final class UninstallDictionaryFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<void>, InstalledDictionary> {

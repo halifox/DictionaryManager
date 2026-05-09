@@ -14,7 +14,7 @@ part 'uninstall_progress_page.g.dart';
 Future<void> uninstallDictionary(Ref ref, InstalledDictionary dictionary) async {
   final api = DictionaryApi();
   await api.removeWords(dictionary.wordIds);
-  await DictionaryStorage.removeDictionary(dictionary.name);
+  await DictionaryStorage.removeDictionary(dictionary.name, dictionary.source, dictionary.category);
 }
 
 class UninstallProgressPage extends HookConsumerWidget {
@@ -38,7 +38,7 @@ class UninstallProgressPage extends HookConsumerWidget {
           // 卸载完成后刷新状态
           Future.microtask(() {
             ref.invalidate(installedDictionariesProvider);
-            ref.invalidate(isDictionaryInstalledProvider(dictionary.name));
+            ref.invalidate(isDictionaryInstalledProvider(dictionary.name, dictionary.source, dictionary.category));
           });
 
           return StateView.finish(

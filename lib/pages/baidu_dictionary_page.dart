@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../models/ime_format.dart';
+import '../providers/installed_dictionaries_provider.dart';
 import 'dictionary_download_page.dart';
 import 'dictionary_preview_page.dart';
 import '../parsers/parser_factory.dart';
@@ -181,21 +182,33 @@ class BaiduDictionaryPage extends HookConsumerWidget {
                       final dictName = (dict['name'] as String).trim();
                       final count = dict['count'] as String?;
                       final example = dict['example'] as String?;
-
+                      final isInstalledAsync = ref.watch(
+                        isDictionaryInstalledProvider(dictName, 'online', 'baidu'),
+                      );
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                           tileColor: colorScheme.primaryContainer.withAlpha(100),
+                          leading: DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.primaryContainer,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.book_outlined,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
                           title: Text(
                             dictName,
-                            style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(color: colorScheme.onSurface),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,18 +235,52 @@ class BaiduDictionaryPage extends HookConsumerWidget {
                               ],
                             ],
                           ),
-                          trailing: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorScheme.primaryContainer,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.arrow_forward,
-                                color: colorScheme.onPrimaryContainer,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              isInstalledAsync.when(
+                                data: (data) {
+                                  if (!data) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Container(
+                                    margin: .symmetric(horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '已安装',
+                                      style: Theme.of(context).textTheme.labelMedium
+                                          ?.copyWith(color: colorScheme.onPrimaryContainer),
+                                    ),
+                                  );
+                                },
+                                loading: () {
+                                  return const SizedBox.shrink();
+                                },
+                                error: (error, stackTrace) {
+                                  return const SizedBox.shrink();
+                                },
                               ),
-                            ),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: colorScheme.primaryContainer,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.arrow_forward,
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           onTap: () {
                             final downloadUrl = dict['download'] as String?;

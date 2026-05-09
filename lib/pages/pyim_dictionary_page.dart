@@ -1,11 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import '../models/ime_format.dart';
-import '../parsers/parser_factory.dart';
-import '../providers/dictionary_download_provider.dart';
-import '../providers/installed_dictionaries_provider.dart';
 import '../parsers/text/pyim_table_parser.dart';
+import '../providers/installed_dictionaries_provider.dart';
 import 'dictionary_download_page.dart';
 import 'dictionary_preview_page.dart';
 
@@ -18,23 +17,41 @@ class PyimDictionaryPage extends HookConsumerWidget {
 
     final dictionaries = [
       {'name': '艺术', 'icon': Icons.palette_outlined, 'file': 'art.table'},
-      {'name': '文化', 'icon': Icons.auto_stories_outlined, 'file': 'culture.table'},
-      {'name': '经济', 'icon': Icons.attach_money_outlined, 'file': 'economy.table'},
+      {
+        'name': '文化',
+        'icon': Icons.auto_stories_outlined,
+        'file': 'culture.table',
+      },
+      {
+        'name': '经济',
+        'icon': Icons.attach_money_outlined,
+        'file': 'economy.table',
+      },
       {'name': '地质', 'icon': Icons.terrain_outlined, 'file': 'geology.table'},
-      {'name': '历史', 'icon': Icons.history_edu_outlined, 'file': 'history.table'},
+      {
+        'name': '历史',
+        'icon': Icons.history_edu_outlined,
+        'file': 'history.table',
+      },
       {'name': '生活', 'icon': Icons.home_outlined, 'file': 'life.table'},
       {'name': '自然', 'icon': Icons.nature_outlined, 'file': 'nature.table'},
       {'name': '人物', 'icon': Icons.person_outline, 'file': 'people.table'},
       {'name': '科学', 'icon': Icons.science_outlined, 'file': 'science.table'},
       {'name': '社会', 'icon': Icons.groups_outlined, 'file': 'society.table'},
-      {'name': '体育', 'icon': Icons.sports_soccer_outlined, 'file': 'sport.table'},
-      {'name': '科技', 'icon': Icons.computer_outlined, 'file': 'technology.table'},
+      {
+        'name': '体育',
+        'icon': Icons.sports_soccer_outlined,
+        'file': 'sport.table',
+      },
+      {
+        'name': '科技',
+        'icon': Icons.computer_outlined,
+        'file': 'technology.table',
+      },
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pyim 词库'),
-      ),
+      appBar: AppBar(title: const Text('Pyim 词库')),
       body: ListView.builder(
         itemCount: dictionaries.length,
         itemBuilder: (context, index) {
@@ -42,250 +59,71 @@ class PyimDictionaryPage extends HookConsumerWidget {
           final fileName = dict['file'] as String;
           final dictName = dict['name'] as String;
 
-          final isDownloadedAsync = ref.watch(isDictionaryDownloadedProvider(fileName));
-          final isInstalledAsync = ref.watch(isDictionaryInstalledProvider(dictName));
+          final isInstalledAsync = ref.watch(
+            isDictionaryInstalledProvider(dictName, 'online', 'pyim'),
+          );
 
-          return isDownloadedAsync.when(
-            data: (isDownloaded) {
-              return isInstalledAsync.when(
-                data: (isInstalled) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      tileColor: colorScheme.primaryContainer.withAlpha(100),
-                      leading: DecoratedBox(
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 4,
+                horizontal: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              tileColor: colorScheme.primaryContainer.withAlpha(100),
+              leading: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.primaryContainer,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    dict['icon'] as IconData,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              title: Text(
+                dictName,
+                style: TextStyle(color: colorScheme.onSurface),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  isInstalledAsync.when(
+                    data: (data) {
+                      if (!data) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        margin: .symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
                           color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(
-                            dict['icon'] as IconData,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
+                        child: Text(
+                          '已安装',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(color: colorScheme.onPrimaryContainer),
                         ),
-                      ),
-                      title: Text(
-                        dictName,
-                        style: TextStyle(color: colorScheme.onSurface),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isInstalled)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '已安装',
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 8),
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorScheme.primaryContainer,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.arrow_forward,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        if (isDownloaded) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DictionaryPreviewPage(
-                                loadData: () async {
-                                  final path = await ref.read(getDictionaryPathProvider(fileName).future);
-                                  final parser = ParserFactory.createParserByFormat(ImeFormat.pyimTable);
-                                  final result = await parser.parseFile(path);
-                                  return result.entries;
-                                },
-                                dictionaryName: dictName,
-                                category: 'pyim',
-                                source: 'online',
-                              ),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DictionaryDownloadPage(
-                                fileName: fileName,
-                                dictionaryName: dictName,
-                                format: ImeFormat.pyimTable,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  );
-                },
-                loading: () => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    tileColor: colorScheme.primaryContainer.withAlpha(100),
-                    leading: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.primaryContainer,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          dict['icon'] as IconData,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      dictName,
-                      style: TextStyle(color: colorScheme.onSurface),
-                    ),
-                    trailing: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.primaryContainer,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
+                      );
+                    },
+                    loading: () {
+                      return const SizedBox.shrink();
+                    },
+                    error: (error, stackTrace) {
+                      return const SizedBox.shrink();
+                    },
                   ),
-                ),
-                error: (error, stackTrace) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    tileColor: colorScheme.primaryContainer.withAlpha(100),
-                    leading: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.primaryContainer,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          dict['icon'] as IconData,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      dictName,
-                      style: TextStyle(color: colorScheme.onSurface),
-                    ),
-                    trailing: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.primaryContainer,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-            loading: () {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  tileColor: colorScheme.primaryContainer.withAlpha(100),
-                  leading: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primaryContainer,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        dict['icon'] as IconData,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    dictName,
-                    style: TextStyle(color: colorScheme.onSurface),
-                  ),
-                  subtitle: const Text('检查中...'),
-                  trailing: const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              );
-            },
-            error: (error, _) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  tileColor: colorScheme.primaryContainer.withAlpha(100),
-                  leading: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primaryContainer,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        dict['icon'] as IconData,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    dictName,
-                    style: TextStyle(color: colorScheme.onSurface),
-                  ),
-                  subtitle: const Text('检查失败'),
-                  trailing: DecoratedBox(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: colorScheme.primaryContainer,
@@ -298,21 +136,21 @@ class PyimDictionaryPage extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DictionaryDownloadPage(
-                          fileName: fileName,
-                          dictionaryName: dictName,
-                          format: ImeFormat.pyimTable,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DictionaryDownloadPage(
+                      fileName: fileName,
+                      dictionaryName: dictName,
+                      format: ImeFormat.pyimTable,
+                    ),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

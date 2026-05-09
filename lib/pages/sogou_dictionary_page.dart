@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../models/ime_format.dart';
+import '../providers/installed_dictionaries_provider.dart';
 import 'dictionary_download_page.dart';
 import 'dictionary_preview_page.dart';
 import '../parsers/parser_factory.dart';
@@ -50,7 +51,7 @@ class SogouDictionaryPage extends HookConsumerWidget {
 
       for (final id in selectedPath.value) {
         current = searchList.firstWhere(
-          (c) => c['id'] == id,
+              (c) => c['id'] == id,
           orElse: () => null,
         );
         if (current == null) return null;
@@ -88,7 +89,7 @@ class SogouDictionaryPage extends HookConsumerWidget {
       for (int i = 0; i < selectedPath.value.length; i++) {
         final selectedId = selectedPath.value[i];
         final selected = currentList.firstWhere(
-          (c) => c['id'] == selectedId,
+              (c) => c['id'] == selectedId,
           orElse: () => null,
         );
         if (selected == null || selected['children'] == null) break;
@@ -129,7 +130,7 @@ class SogouDictionaryPage extends HookConsumerWidget {
                       children: categoryLevels[level].map((cat) {
                         final catId = cat['id'] as String;
                         final isSelected = selectedPath.value.length > level &&
-                                          selectedPath.value[level] == catId;
+                            selectedPath.value[level] == catId;
                         return ChoiceChip(
                           label: Text(cat['name'] as String),
                           selected: isSelected,
@@ -149,8 +150,8 @@ class SogouDictionaryPage extends HookConsumerWidget {
                           labelStyle: TextStyle(
                             color: isSelected
                                 ? (level == 0
-                                    ? colorScheme.onPrimaryContainer
-                                    : colorScheme.onSecondaryContainer)
+                                ? colorScheme.onPrimaryContainer
+                                : colorScheme.onSecondaryContainer)
                                 : colorScheme.onSurface,
                           ),
                         );
@@ -165,107 +166,153 @@ class SogouDictionaryPage extends HookConsumerWidget {
           Expanded(
             child: dictList.isEmpty
                 ? Center(
-                    child: Text(
-                      selectedPath.value.isEmpty
-                          ? '请选择分类'
-                          : '该分类下暂无词库',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurface.withAlpha(150),
-                          ),
-                    ),
-                  )
+              child: Text(
+                selectedPath.value.isEmpty
+                    ? '请选择分类'
+                    : '该分类下暂无词库',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface.withAlpha(150),
+                ),
+              ),
+            )
                 : ListView.builder(
-                    itemCount: dictList.length,
-                    itemBuilder: (context, index) {
-                      final dict = dictList[index];
-                      final dictName = dict['name'] as String;
-                      final count = dict['count'] as String?;
-                      final example = dict['example'] as String?;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          tileColor: colorScheme.primaryContainer.withAlpha(100),
-                          title: Text(
-                            dictName,
-                            style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w500,
+              itemCount: dictList.length,
+              itemBuilder: (context, index) {
+                final dict = dictList[index];
+                final dictName = dict['name'] as String;
+                final count = dict['count'] as String?;
+                final example = dict['example'] as String?;
+                final isInstalledAsync = ref.watch(
+                  isDictionaryInstalledProvider(dictName, 'online', 'sogou'),
+                );
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    tileColor: colorScheme.primaryContainer.withAlpha(100),
+                    leading: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.primaryContainer,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.book_outlined,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      dictName,
+                      style: TextStyle(color: colorScheme.onSurface),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (count != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '词条数：$count',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withAlpha(180),
                             ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (count != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  '词条数：$count',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.onSurface.withAlpha(180),
-                                      ),
-                                ),
-                              ],
-                              if (example != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  example,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.onSurface.withAlpha(150),
-                                      ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          trailing: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorScheme.primaryContainer,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.arrow_forward,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
+                        ],
+                        if (example != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            example,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withAlpha(150),
                             ),
                           ),
-                          onTap: () {
-                            final downloadUrl = dict['download'] as String?;
-                            if (downloadUrl == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('下载链接不可用'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                              return;
+                        ],
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        isInstalledAsync.when(
+                          data: (data) {
+                            if (!data) {
+                              return const SizedBox.shrink();
                             }
-
-                            final fileName = '${dictName.replaceAll(RegExp(r'[^\w一-龥]'), '_')}.scel';
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DictionaryDownloadPage(
-                                  fileName: fileName,
-                                  dictionaryName: dictName,
-                                  format: ImeFormat.sougouScel,
-                                  downloadUrl: downloadUrl,
-                                  category: 'sogou',
-                                ),
+                            return Container(
+                              margin: .symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '已安装',
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: colorScheme.onPrimaryContainer),
                               ),
                             );
                           },
+                          loading: () {
+                            return const SizedBox.shrink();
+                          },
+                          error: (error, stackTrace) {
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorScheme.primaryContainer,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      final downloadUrl = dict['download'] as String?;
+                      if (downloadUrl == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('下载链接不可用'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return;
+                      }
+
+                      final fileName = '${dictName.replaceAll(RegExp(r'[^\w一-龥]'), '_')}.scel';
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DictionaryDownloadPage(
+                            fileName: fileName,
+                            dictionaryName: dictName,
+                            format: ImeFormat.sougouScel,
+                            downloadUrl: downloadUrl,
+                            category: 'sogou',
+                          ),
                         ),
                       );
                     },
                   ),
+                );
+              },
+            ),
           ),
         ],
       ),

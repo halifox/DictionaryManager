@@ -42,7 +42,7 @@ class InstallProgressPage extends HookConsumerWidget {
         ).then((_) {
           hasSaved.value = true;
           ref.invalidate(installedDictionariesProvider);
-          ref.invalidate(isDictionaryInstalledProvider(dictionaryName));
+          ref.invalidate(isDictionaryInstalledProvider(dictionaryName, source, category));
         });
       }
       return null;

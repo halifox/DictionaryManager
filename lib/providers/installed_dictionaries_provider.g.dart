@@ -38,7 +38,7 @@ final class InstalledDictionariesProvider
 }
 
 String _$installedDictionariesHash() =>
-    r'3e666d0683349c9220efa82860da2df876ef7297';
+    r'560253dab8a941645b2b4a0a8410eae493553ed3';
 
 abstract class _$InstalledDictionaries
     extends $AsyncNotifier<List<InstalledDictionary>> {
@@ -75,7 +75,7 @@ final class IsDictionaryInstalledProvider
     with $FutureModifier<bool>, $FutureProvider<bool> {
   IsDictionaryInstalledProvider._({
     required IsDictionaryInstalledFamily super.from,
-    required String super.argument,
+    required (String, String, String) super.argument,
   }) : super(
          retry: null,
          name: r'isDictionaryInstalledProvider',
@@ -91,7 +91,7 @@ final class IsDictionaryInstalledProvider
   String toString() {
     return r'isDictionaryInstalledProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -101,8 +101,8 @@ final class IsDictionaryInstalledProvider
 
   @override
   FutureOr<bool> create(Ref ref) {
-    final argument = this.argument as String;
-    return isDictionaryInstalled(ref, argument);
+    final argument = this.argument as (String, String, String);
+    return isDictionaryInstalled(ref, argument.$1, argument.$2, argument.$3);
   }
 
   @override
@@ -117,10 +117,10 @@ final class IsDictionaryInstalledProvider
 }
 
 String _$isDictionaryInstalledHash() =>
-    r'bf0ed2ca2c5b528ec14e2d62117f3454ab04a84e';
+    r'5cd951b8a31c5e9b584ca2a974da744aed5e233f';
 
 final class IsDictionaryInstalledFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<bool>, String> {
+    with $FunctionalFamilyOverride<FutureOr<bool>, (String, String, String)> {
   IsDictionaryInstalledFamily._()
     : super(
         retry: null,
@@ -130,8 +130,14 @@ final class IsDictionaryInstalledFamily extends $Family
         isAutoDispose: true,
       );
 
-  IsDictionaryInstalledProvider call(String name) =>
-      IsDictionaryInstalledProvider._(argument: name, from: this);
+  IsDictionaryInstalledProvider call(
+    String name,
+    String source,
+    String category,
+  ) => IsDictionaryInstalledProvider._(
+    argument: (name, source, category),
+    from: this,
+  );
 
   @override
   String toString() => r'isDictionaryInstalledProvider';
